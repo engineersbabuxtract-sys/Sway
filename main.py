@@ -23,8 +23,8 @@ PORT = int(os.getenv("PORT", "8080"))
 API_BASE = "https://gdgoenkaratia.com/api"
 USER_ID = os.getenv("USER_ID", "")
 
-SMTP_EMAIL = os.getenv("SMTP_EMAIL", "")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+SMTP_EMAIL = os.getenv("SMTP_Server_Hostname", "")
+SMTP_PASSWORD = os.getenv("Port", "")
 
 def get_html():
     html_path = Path(__file__).parent / "index.html"
