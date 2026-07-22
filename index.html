@@ -103,6 +103,7 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 .empty-hint{color:var(--ink-soft);font-size:13px;font-style:italic;}
 .debug-panel{font-size:11px;margin-top:8px;padding:8px;background:var(--rule-bg);border-radius:6px;word-break:break-all;display:none;max-height:200px;overflow-y:auto;font-family:'JetBrains Mono',monospace;}
 .btn-open{display:inline-block;margin-top:8px;padding:8px 16px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;}
+.btn-small{padding:6px 12px;font-size:11px;background:var(--accent-2);color:#fff;border:none;border-radius:6px;cursor:pointer;margin:4px 4px 0 0;}
 [hidden]{display:none!important;}
 </style>
 </head>
@@ -159,12 +160,14 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
   </div>
 
   <div class="view" id="viewPlayer" hidden>
-    <div class="view-title" id="playerTitle">Player</div><span class="view-hint">↓ all video routed through proxy</span>
+    <div class="view-title" id="playerTitle">Player</div><span class="view-hint">↓ click to play · opens in new tab if blocked</span>
     <div id="playerLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading...</div>
     <div class="player-grid">
       <div class="panel">
-        <h3>🎬 Video (Proxy)</h3>
-        <div id="videoPlayer"><video id="hlsVideo" controls autoplay playsinline style="width:100%;border-radius:10px;background:#000;min-height:240px;"></video></div>
+        <h3>🎬 Video</h3>
+        <div id="videoPlayer">
+          <video id="hlsVideo" controls autoplay playsinline style="width:100%;border-radius:10px;background:#000;min-height:240px;"></video>
+        </div>
         <div class="debug-panel" id="videoDebug"></div>
         <div id="videoList"></div>
       </div>
@@ -283,7 +286,7 @@ async function goPlayer(batchId,topicId,topicName){
   if(!videos.length){vl.innerHTML='<div class="empty-hint">No videos</div>';}
   else{
     vl.dataset.videos=JSON.stringify(videos);
-    vl.innerHTML=videos.map((v,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectVideo(${i},this)">🎬 ${esc(v.title)} <span class="badge ${v.type==='mp4'?'badge-free':'badge-vod'}">${v.type.toUpperCase()}</span><br><small style="opacity:0.6;font-size:10px;">${v.src.substring(0,70)}...</small></div>`).join("");
+    vl.innerHTML=videos.map((v,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectVideo(${i},this)">🎬 ${esc(v.title)} <span class="badge ${v.type==='mp4'?'badge-free':'badge-vod'}">${v.type.toUpperCase()}</span></div>`).join("");
     playVideo(videos[0]);
   }
 
@@ -304,38 +307,58 @@ function playVideo(v){
   const debug=document.getElementById("videoDebug");
   destroyPlayer();
   debug.style.display="block";
+  debug.innerHTML=`<strong>📡 Source:</strong> ${v.src.substring(0,100)}...<br><strong>📦 Type:</strong> ${v.type}<br>`;
 
-  // ALL video requests go through proxy
-  const proxyUrl = `/api/video?url=${encodeURIComponent(v.src)}`;
-  debug.innerHTML=`<strong>🔄 Proxy:</strong> /api/video<br><strong>📡 Target:</strong> ${v.src.substring(0,80)}...<br><strong>📦 Type:</strong> ${v.type}<br><a href="${v.src}" target="_blank" class="btn-open">📎 Raw Link</a>`;
-
+  // Try direct playback FIRST (not proxy)
+  // Since you can play it in browser tab, let's try direct
   if(v.type==="mp4"||v.src.includes('.mp4')){
-    debug.innerHTML+=`<br>✅ MP4 via proxy`;
-    video.src=proxyUrl;
-    video.play().catch(e=>debug.innerHTML+=`<br>❌ ${e.message}`);
+    debug.innerHTML+=`✅ MP4 Direct Playback<br>`;
+    video.src=v.src;
+    video.play().catch(e=>debug.innerHTML+=`❌ ${e.message}<br>`);
+    // Fallback
+    video.onerror=()=>{
+      debug.innerHTML+=`❌ Direct failed<br><a href="${v.src}" target="_blank" class="btn-open">📎 Open in New Tab</a>`;
+    };
     return;
   }
 
+  // HLS - Try direct first, then proxy
+  tryPlayHLS(video, debug, v, v.src, (success)=>{
+    if(!success){
+      debug.innerHTML+=`<br>🔄 Trying via proxy...<br>`;
+      tryPlayHLS(video, debug, v, `/api/video?url=${encodeURIComponent(v.src)}`, (s2)=>{
+        if(!s2){
+          debug.innerHTML+=`<br>❌ All methods failed<br><a href="${v.src}" target="_blank" class="btn-open">📎 Open in New Tab</a>
+          <br><button class="btn-small" onclick="window.open('${v.src}','_blank')">🔗 Open Raw Link</button>`;
+        }
+      });
+    }
+  });
+}
+
+function tryPlayHLS(video, debug, v, src, callback){
   if(Hls.isSupported()){
-    debug.innerHTML+=`<br>✅ HLS.js loaded`;
-    hlsInstance=new Hls({maxBufferLength:60,enableWorker:true,debug:false,xhrSetup:function(xhr){xhr.withCredentials=false;}});
-    hlsInstance.loadSource(proxyUrl);
+    debug.innerHTML+=`✅ HLS.js<br>`;
+    hlsInstance=new Hls({maxBufferLength:60,enableWorker:true,debug:false});
+    hlsInstance.loadSource(src);
     hlsInstance.attachMedia(video);
-    hlsInstance.on(Hls.Events.MANIFEST_PARSED,(e,d)=>{debug.innerHTML+=`<br>✅ ${d.levels.length} qualities`;video.play().catch(()=>{});});
-    hlsInstance.on(Hls.Events.LEVEL_LOADED,(e,d)=>{debug.innerHTML+=`<br>📊 Level ${d.level} (${d.details.totalduration}s)`;});
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED,(e,d)=>{debug.innerHTML+=`✅ ${d.levels.length} qualities<br>`;video.play().catch(()=>{});callback(true);});
     hlsInstance.on(Hls.Events.ERROR,(e,d)=>{
-      debug.innerHTML+=`<br>❌ ${d.type}: ${d.details}`;
-      if(d.fatal){if(d.type===Hls.ErrorTypes.NETWORK_ERROR)hlsInstance.startLoad();else if(d.type===Hls.ErrorTypes.MEDIA_ERROR)hlsInstance.recoverMediaError();else{debug.innerHTML+=`<br>💀 Fatal`;hlsInstance.destroy();}}
+      debug.innerHTML+=`❌ ${d.details}<br>`;
+      if(d.fatal){hlsInstance.destroy();callback(false);}
+      else{hlsInstance.startLoad();}
     });
   }else if(video.canPlayType('application/vnd.apple.mpegurl')){
-    debug.innerHTML+=`<br>✅ Safari native`;
-    video.src=proxyUrl;video.play().catch(()=>{});
+    debug.innerHTML+=`✅ Safari native<br>`;
+    video.src=src;
+    video.onloadedmetadata=()=>{video.play().catch(()=>{});callback(true);};
+    video.onerror=()=>{debug.innerHTML+=`❌ Failed<br>`;callback(false);};
   }else{
-    debug.innerHTML+=`<br>⚠️ No HLS support`;
-    video.src=proxyUrl;video.play().catch(()=>{});
+    debug.innerHTML+=`⚠️ No HLS<br>`;
+    callback(false);
   }
-
-  setTimeout(()=>{if(video.paused&&video.currentTime===0)debug.innerHTML+=`<br><br>⏰ No playback after 8s<br><a href="${v.src}" target="_blank" class="btn-open">📎 Open Raw</a>`;},8000);
+  // Timeout
+  setTimeout(()=>{if(video.paused&&video.currentTime===0)callback(false);},10000);
 }
 
 function selectPdf(i,el){document.querySelectorAll("#pdfList .list-item").forEach(x=>x.classList.remove("playing"));el.classList.add("playing");loadPdf(JSON.parse(document.getElementById("pdfList").dataset.pdfs)[i]);}
