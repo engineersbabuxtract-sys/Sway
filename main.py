@@ -2,8 +2,7 @@
 """
 Engineers Babu - Koyeb Edition
 ===============================
-API proxy only. Video plays directly in browser.
-No video proxy - no CloudFlare blocking.
+API proxy only. Videos open in new tab (no CORS/CloudFlare issues).
 """
 
 import os
