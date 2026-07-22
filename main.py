@@ -2,7 +2,7 @@
 """
 Engineers Babu - Koyeb Edition
 ===============================
-API proxy only. Videos open in new tab (no CORS/CloudFlare issues).
+API proxy only. Videos open in new tab.
 """
 
 import os
