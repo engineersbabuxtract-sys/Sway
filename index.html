@@ -9,8 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
 <style>
 :root{
   --paper:#eef1f7;--card:#ffffff;--rule-bg:#f6f8fc;--ink:#1b2333;--ink-soft:#5b6478;
@@ -94,6 +92,13 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 .list-item:hover{border-color:var(--accent);}
 .list-item.playing{background:var(--accent);color:#fff;}
 .empty-hint{color:var(--ink-soft);font-size:13px;font-style:italic;}
+.video-btn{
+  display:inline-block;padding:14px 28px;background:var(--accent);color:#fff;
+  border-radius:12px;text-decoration:none;font-weight:600;font-size:15px;
+  margin:6px 0;transition:filter .15s;
+}
+.video-btn:hover{filter:brightness(1.1);}
+.video-card{text-align:center;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-top:12px;}
 [hidden]{display:none!important;}
 </style>
 </head>
@@ -150,14 +155,11 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
   </div>
 
   <div class="view" id="viewPlayer" hidden>
-    <div class="view-title" id="playerTitle">Player</div><span class="view-hint">↓ click any video or pdf below</span>
+    <div class="view-title" id="playerTitle">Player</div><span class="view-hint">↓ click to open video in new tab</span>
     <div id="playerLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading...</div>
     <div class="player-grid">
       <div class="panel">
-        <h3>🎬 Video</h3>
-        <div id="videoPlayer">
-          <video id="hlsVideo" controls autoplay playsinline style="width:100%;border-radius:10px;background:#000;min-height:240px;"></video>
-        </div>
+        <h3>🎬 Videos</h3>
         <div id="videoList"></div>
       </div>
       <div class="panel">
@@ -172,7 +174,6 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 <script>
 const USER_ID="";
 let state={loggedIn:false,batchId:null,topicId:null,batchName:null,topicName:null};
-let hlsInstance=null;
 
 async function apiGet(endpoint,params={}){
   params.userId=USER_ID;
@@ -223,11 +224,10 @@ function renderBreadcrumb(){
   bc.querySelectorAll(".crumb").forEach((el,i)=>{if(p[i].f)el.onclick=p[i].f;});
 }
 function renderApps(){showView("viewApps");renderBreadcrumb();}
-function goApps(){state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;destroyPlayer();renderApps();}
-function destroyPlayer(){if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}const v=document.getElementById("hlsVideo");v.pause();v.removeAttribute("src");v.load();}
+function goApps(){state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;renderApps();}
 
 async function goBatches(){
-  state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;destroyPlayer();
+  state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;
   showView("viewBatches");document.getElementById("batchesTitle").textContent="Selection Way — All Batches";
   document.getElementById("batchesGrid").innerHTML="";document.getElementById("batchesLoading").hidden=false;renderBreadcrumb();
   const d=await apiGet("courses/active");document.getElementById("batchesLoading").hidden=true;
@@ -239,7 +239,7 @@ async function goBatches(){
 }
 
 async function goTopics(batchId,batchName){
-  state.batchId=batchId;state.topicId=null;state.batchName=batchName;state.topicName=null;destroyPlayer();
+  state.batchId=batchId;state.topicId=null;state.batchName=batchName;state.topicName=null;
   showView("viewTopics");document.getElementById("topicsTitle").textContent=batchName;
   document.getElementById("topicsList").innerHTML="";document.getElementById("topicsLoading").hidden=false;
   document.getElementById("facultyNote").hidden=true;renderBreadcrumb();
@@ -250,7 +250,7 @@ async function goTopics(batchId,batchName){
 }
 
 async function goPlayer(batchId,topicId,topicName){
-  state.topicId=topicId;state.topicName=topicName;destroyPlayer();
+  state.topicId=topicId;state.topicName=topicName;
   showView("viewPlayer");document.getElementById("playerTitle").textContent=topicName;
   document.getElementById("videoList").innerHTML="";document.getElementById("pdfList").innerHTML="";
   document.getElementById("pdfViewer").src="";document.getElementById("playerLoading").hidden=false;renderBreadcrumb();
@@ -263,13 +263,17 @@ async function goPlayer(batchId,topicId,topicName){
     (c.classPdf||[]).forEach(pdf=>{if(pdf.url) pdfs.push({name:pdf.name||"PDF",src:pdf.url});});
   });
 
-  // Videos
+  // Videos - Open in New Tab (no Origin/Referer blocking)
   const vl=document.getElementById("videoList");
   if(!videos.length){vl.innerHTML='<div class="empty-hint">No videos</div>';}
   else{
-    vl.dataset.videos=JSON.stringify(videos);
-    vl.innerHTML=videos.map((v,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectVideo(${i},this)">🎬 ${esc(v.title)}</div>`).join("");
-    playVideo(videos[0]);
+    vl.innerHTML=videos.map((v,i)=>`
+      <div class="video-card">
+        <p style="font-weight:600;margin-bottom:10px;">🎬 ${esc(v.title)}</p>
+        <a href="${v.src}" target="_blank" rel="noopener noreferrer" class="video-btn">▶️ Open Video in New Tab</a>
+        <p style="font-size:11px;color:var(--ink-soft);margin-top:6px;">Opens directly from source · No restrictions</p>
+      </div>
+    `).join("");
   }
 
   // PDFs
@@ -278,39 +282,9 @@ async function goPlayer(batchId,topicId,topicName){
   else{pl.dataset.pdfs=JSON.stringify(pdfs);pl.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectPdf(${i},this)">📄 ${esc(p.name)}</div>`).join("");loadPdf(pdfs[0]);}
 }
 
-// ─── VIDEO PLAYER (DIRECT - NO PROXY) ───
-function selectVideo(i,el){
-  document.querySelectorAll("#videoList .list-item").forEach(x=>x.classList.remove("playing"));
-  el.classList.add("playing");
-  playVideo(JSON.parse(document.getElementById("videoList").dataset.videos)[i]);
-}
-
-function playVideo(v){
-  console.log("▶️ Playing DIRECT:",v.title,v.src);
-  const video=document.getElementById("hlsVideo");
-  destroyPlayer();
-
-  // Play DIRECTLY - no proxy, no middleware
-  if(Hls.isSupported()){
-    hlsInstance=new Hls({maxBufferLength:60,enableWorker:true});
-    hlsInstance.loadSource(v.src);  // DIRECT URL
-    hlsInstance.attachMedia(video);
-    hlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{}));
-    hlsInstance.on(Hls.Events.ERROR,(e,d)=>{console.error("HLS Error:",d);if(d.fatal)hlsInstance.destroy();});
-  }else if(video.canPlayType('application/vnd.apple.mpegurl')){
-    video.src=v.src;  // DIRECT URL
-    video.play().catch(()=>{});
-  }else{
-    video.src=v.src;  // DIRECT URL - fallback
-    video.play().catch(()=>{});
-  }
-}
-
-// ─── PDF ───
 function selectPdf(i,el){document.querySelectorAll("#pdfList .list-item").forEach(x=>x.classList.remove("playing"));el.classList.add("playing");loadPdf(JSON.parse(document.getElementById("pdfList").dataset.pdfs)[i]);}
 function loadPdf(p){document.getElementById("pdfViewer").src=`https://docs.google.com/gview?url=${encodeURIComponent(p.src)}&embedded=true`;}
 
-// ─── SEARCH ───
 async function handleSearch(val){
   val=val.toLowerCase().trim();if(!val){goApps();return;}
   showView("viewTopics");document.getElementById("topicsTitle").textContent=`Search: "${val}"`;document.getElementById("facultyNote").hidden=true;
