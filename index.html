@@ -9,79 +9,70 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
-<!-- HLS.js for m3u8 playback -->
+<!-- HLS.js -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
 :root{
   --paper:#eef1f7;--card:#ffffff;--rule-bg:#f6f8fc;--ink:#1b2333;--ink-soft:#5b6478;
-  --border:rgba(27,35,51,0.09);--rule:rgba(41,85,201,0.14);--accent:#2955c9;
-  --accent-soft:#e7edfb;--accent-2:#c8404f;--gold:#c98a24;
-  --shadow:0 10px 30px -14px rgba(27,35,51,0.18);--radius:12px;
+  --border:rgba(27,35,51,0.09);--accent:#2955c9;--accent-soft:#e7edfb;--accent-2:#c8404f;
+  --gold:#c98a24;--shadow:0 10px 30px -14px rgba(27,35,51,0.18);--radius:12px;
 }
 .dark{
   --paper:#0e1017;--card:#161a24;--rule-bg:#141824;--ink:#eef1f7;--ink-soft:#98a1b8;
-  --border:rgba(255,255,255,0.08);--rule:rgba(120,150,255,0.10);--accent:#5c86ff;
-  --accent-soft:#1d2740;--accent-2:#e2707c;--gold:#e0ab52;
-  --shadow:0 10px 30px -14px rgba(0,0,0,0.5);
+  --border:rgba(255,255,255,0.08);--accent:#5c86ff;--accent-soft:#1d2740;--accent-2:#e2707c;
+  --gold:#e0ab52;--shadow:0 10px 30px -14px rgba(0,0,0,0.5);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);transition:background .25s ease,color .25s ease;min-height:100vh;}
-h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
-.hand{font-family:'Kalam',cursive;}.mono{font-family:'JetBrains Mono',monospace;}
+body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);transition:background .25s,color .25s;min-height:100vh;}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;}
 button,input{font-family:inherit;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-@media (prefers-reduced-motion: reduce){.screen{animation:none;}}
 
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
-#loginScreen::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(var(--rule) 0 1px, transparent 1px 40px);opacity:.6;pointer-events:none;}
+#loginScreen::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(rgba(41,85,201,0.08) 0 1px,transparent 1px 40px);opacity:.6;pointer-events:none;}
 .login-card{position:relative;width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:34px 30px 28px;}
-.login-card .brand{font-size:26px;font-weight:700;letter-spacing:.5px;}
+.login-card .brand{font-size:26px;font-weight:700;}
 .login-card .brand span{color:var(--accent);}
 .login-sub{color:var(--ink-soft);font-size:13px;margin-top:4px;margin-bottom:22px;}
 .mode-switch{display:flex;background:var(--rule-bg);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:18px;}
-.mode-switch button{flex:1;border:none;background:transparent;color:var(--ink-soft);padding:9px 0;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;transition:background .2s,color .2s;}
+.mode-switch button{flex:1;border:none;background:transparent;color:var(--ink-soft);padding:9px 0;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;}
 .mode-switch button.active{background:var(--accent);color:#fff;}
 .field{margin-bottom:14px;}
 .field label{font-size:12px;color:var(--ink-soft);display:block;margin-bottom:6px;font-weight:500;}
 .field .row{display:flex;align-items:center;border:1px solid var(--border);border-radius:10px;background:var(--rule-bg);overflow:hidden;}
 .field .prefix{padding:11px 10px;color:var(--ink-soft);font-size:14px;border-right:1px solid var(--border);}
 .field input{flex:1;border:none;background:transparent;outline:none;padding:11px 12px;color:var(--ink);font-size:14px;}
-.btn-primary{width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;cursor:pointer;margin-top:6px;transition:filter .15s, transform .15s;}
-.btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.skip-link{display:block;text-align:center;margin-top:16px;font-size:13px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
-.skip-link:hover{color:var(--accent);}
+.btn-primary{width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;cursor:pointer;margin-top:6px;}
+.btn-primary:hover{filter:brightness(1.08);}
+.skip-link{display:block;text-align:center;margin-top:16px;font-size:13px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
 .login-note{margin-top:18px;font-size:12px;color:var(--ink-soft);border-top:1px dashed var(--border);padding-top:12px;}
 .error-msg{color:var(--accent-2);font-size:12px;margin-top:-6px;margin-bottom:10px;display:none;}
 
-.main-header{position:relative;display:flex;justify-content:space-between;align-items:center;padding:16px 22px;background:var(--card);border-bottom:1px solid var(--border);}
+.main-header{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;background:var(--card);border-bottom:1px solid var(--border);}
 .brand-mark{font-size:24px;font-weight:700;display:flex;align-items:baseline;gap:8px;}
-.brand-mark .tag{font-size:11px;color:var(--ink-soft);letter-spacing:2px;font-weight:500;}
+.brand-mark .tag{font-size:11px;color:var(--ink-soft);letter-spacing:2px;}
 .brand-mark span{color:var(--accent);}
 .header-actions{display:flex;align-items:center;gap:10px;}
 .pill-btn{cursor:pointer;padding:8px 14px;border-radius:20px;background:var(--rule-bg);border:1px solid var(--border);font-size:13px;color:var(--ink-soft);font-weight:500;}
-.pill-btn:hover{color:var(--ink);}
 .gradient-bar{height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-2));}
 
-.loading-spinner{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--ink-soft);font-size:14px;}
+.loading-spinner{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--ink-soft);}
 .spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
 .search-wrap{padding:16px 22px 4px;}
 .search-wrap input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);outline:none;background:var(--card);color:var(--ink);font-size:14px;}
-.search-wrap input:focus{border-color:var(--accent);}
 
 .breadcrumb{padding:14px 22px 0;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:15px;color:var(--accent);}
 .breadcrumb .crumb{cursor:pointer;}
-.breadcrumb .crumb:hover{text-decoration:underline;}
-.breadcrumb .crumb.current{color:var(--ink-soft);cursor:default;text-decoration:none;}
+.breadcrumb .crumb.current{color:var(--ink-soft);cursor:default;}
 .breadcrumb .arrow{color:var(--ink-soft);font-size:13px;}
 
 .view{padding:18px 22px 40px;}
 .view-title{font-size:22px;font-weight:700;margin-bottom:4px;}
 .view-hint{font-family:'Kalam',cursive;color:var(--accent);font-size:14px;margin-bottom:18px;display:inline-block;}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
-.nav-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:18px;cursor:pointer;box-shadow:var(--shadow);transition:transform .15s ease;}
+.nav-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:18px;cursor:pointer;box-shadow:var(--shadow);transition:transform .15s;}
 .nav-card:hover{transform:translateY(-3px);}
 .nav-card .icon{font-size:26px;margin-bottom:10px;display:block;}
 .nav-card h3{font-size:16px;margin-bottom:4px;}
@@ -95,7 +86,7 @@ button,input{font-family:inherit;}
 .faculty-note .pin{width:8px;height:8px;border-radius:50%;background:var(--accent-2);}
 
 .topic-list{display:flex;flex-direction:column;gap:10px;}
-.topic-row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:background .15s;}
+.topic-row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;}
 .topic-row:hover{background:var(--accent-soft);}
 .topic-row .name{font-weight:600;font-size:14.5px;}
 .topic-row .sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
@@ -104,52 +95,53 @@ button,input{font-family:inherit;}
 .player-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
 @media(max-width:900px){.player-grid{grid-template-columns:1fr;}}
 .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);}
-.panel h3{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
-video{width:100%;border-radius:10px;background:#000;display:block;}
+.panel h3{font-size:15px;margin-bottom:12px;}
+video{width:100%;border-radius:10px;background:#000;display:block;min-height:240px;}
 iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--rule-bg);}
 .list-item{margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--rule-bg);cursor:pointer;font-size:13.5px;border:1px solid transparent;word-break:break-all;}
 .list-item:hover{border-color:var(--accent);}
 .list-item.playing{background:var(--accent);color:#fff;}
 .empty-hint{color:var(--ink-soft);font-size:13px;font-style:italic;}
-.video-debug{font-size:11px;color:var(--accent-2);margin-top:8px;padding:8px;background:var(--rule-bg);border-radius:6px;word-break:break-all;display:none;}
+.debug-panel{font-size:11px;margin-top:8px;padding:8px;background:var(--rule-bg);border-radius:6px;word-break:break-all;display:none;max-height:200px;overflow-y:auto;}
+.btn-open{display:inline-block;margin-top:8px;padding:8px 16px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;}
+.btn-small{padding:4px 10px;font-size:11px;background:var(--accent-2);color:#fff;border:none;border-radius:6px;cursor:pointer;margin-top:6px;}
 [hidden]{display:none!important;}
 </style>
 </head>
 
 <body>
 
+<!-- ============ LOGIN ============ -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="brand">Engineers<span> Babu</span></div>
-    <div class="login-sub">Sign in to sync your progress, or skip for now.</div>
+    <div class="login-sub">Sign in or skip to browse all batches.</div>
     <div class="mode-switch">
       <button id="modeMobile" class="active" onclick="setLoginMode('mobile')">Mobile</button>
       <button id="modeEmail" onclick="setLoginMode('email')">Email</button>
     </div>
-    <form id="loginForm" onsubmit="return handleLogin(event)">
+    <form onsubmit="return handleLogin(event)">
       <div class="field" id="mobileField">
-        <label>Mobile number</label>
-        <div class="row"><span class="prefix">+91</span><input type="tel" id="mobileInput" placeholder="98765 43210" maxlength="10" inputmode="numeric"></div>
+        <label>Mobile</label>
+        <div class="row"><span class="prefix">+91</span><input type="tel" id="mobileInput" placeholder="98765 43210" maxlength="10"></div>
       </div>
       <div class="field" id="emailField" hidden>
-        <label>Email address</label>
+        <label>Email</label>
         <div class="row"><input type="email" id="emailInput" placeholder="you@example.com"></div>
       </div>
-      <div class="field">
-        <label>Password</label>
-        <div class="row"><input type="password" id="passInput" placeholder="••••••••"></div>
-      </div>
+      <div class="field"><label>Password</label><div class="row"><input type="password" id="passInput" placeholder="••••••••"></div></div>
       <div class="error-msg" id="loginError"></div>
       <button class="btn-primary" type="submit">Continue</button>
     </form>
-    <span class="skip-link" onclick="enterApp(false)">Skip for now → continue as guest</span>
-    <div class="login-note">Login is optional. Guests can browse every batch.</div>
+    <span class="skip-link" onclick="enterApp(false)">Skip → Guest</span>
+    <div class="login-note">No login required to browse.</div>
   </div>
 </div>
 
+<!-- ============ MAIN ============ -->
 <div id="mainScreen" hidden>
   <header class="main-header">
-    <div class="brand-mark">Engineers<span> Babu</span><span class="tag">&nbsp;· LEARNING</span></div>
+    <div class="brand-mark">Engineers<span> Babu</span><span class="tag">· LEARNING</span></div>
     <div class="header-actions">
       <span class="pill-btn" id="userPill">Guest</span>
       <span class="pill-btn" onclick="toggleTheme()">🌙 / ☀️</span>
@@ -157,49 +149,48 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
   </header>
   <div class="gradient-bar"></div>
 
-  <div class="search-wrap">
-    <input type="text" id="searchBox" placeholder="Search batches, topics, faculty…" onkeyup="handleSearch(this.value)">
-  </div>
-
+  <div class="search-wrap"><input type="text" id="searchBox" placeholder="Search batches..." onkeyup="handleSearch(this.value)"></div>
   <div class="breadcrumb" id="breadcrumb"></div>
 
+  <!-- LEVEL 1: Apps -->
   <div class="view" id="viewApps">
     <div class="view-title">My Apps</div>
-    <span class="view-hint">↓ tap any one to open it</span>
+    <span class="view-hint">↓ tap to open</span>
     <div class="card-grid" id="appsGrid">
-      <div class="nav-card" onclick="goBatches('selectionway')">
-        <span class="icon">🎓</span><h3>Selection Way</h3>
-        <p>All batches · Live & Recorded</p>
-        <div class="meta" id="swMeta">Loading...</div>
+      <div class="nav-card" onclick="goBatches()">
+        <span class="icon">🎓</span><h3>Selection Way</h3><p>All batches</p><div class="meta" id="swMeta">Loading...</div>
       </div>
     </div>
   </div>
 
+  <!-- LEVEL 2: Batches -->
   <div class="view" id="viewBatches" hidden>
-    <div class="view-title" id="batchesTitle">All Batches</div>
-    <span class="view-hint">↓ click on any batch</span>
-    <div id="batchesLoading" class="loading-spinner"><div class="spinner"></div> Loading batches...</div>
+    <div class="view-title" id="batchesTitle">Batches</div>
+    <span class="view-hint">↓ click any batch</span>
+    <div id="batchesLoading" class="loading-spinner"><div class="spinner"></div> Loading...</div>
     <div class="card-grid" id="batchesGrid"></div>
   </div>
 
+  <!-- LEVEL 3: Topics -->
   <div class="view" id="viewTopics" hidden>
     <div class="view-title" id="topicsTitle">Topics</div>
-    <div class="faculty-note" id="facultyNote"><span class="pin"></span><span id="facultyName">Faculty</span></div>
-    <div id="topicsLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading topics...</div>
+    <div class="faculty-note" id="facultyNote"><span class="pin"></span><span id="facultyName"></span></div>
+    <div id="topicsLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading...</div>
     <div class="topic-list" id="topicsList"></div>
   </div>
 
+  <!-- LEVEL 4: Player -->
   <div class="view" id="viewPlayer" hidden>
-    <div class="view-title" id="playerTitle">Topic</div>
-    <span class="view-hint" id="playerHint">↓ click any video or pdf below</span>
-    <div id="playerLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading classes...</div>
+    <div class="view-title" id="playerTitle">Player</div>
+    <span class="view-hint">↓ click to play · all video goes through proxy</span>
+    <div id="playerLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading...</div>
     <div class="player-grid">
       <div class="panel">
-        <h3>🎬 Video (HLS/m3u8)</h3>
+        <h3>🎬 Video (via Proxy)</h3>
         <div id="videoPlayer">
           <video id="hlsVideo" controls autoplay playsinline style="width:100%;border-radius:10px;background:#000;min-height:240px;"></video>
         </div>
-        <div class="video-debug" id="videoDebug"></div>
+        <div class="debug-panel" id="videoDebug"></div>
         <div id="videoList"></div>
       </div>
       <div class="panel">
@@ -213,144 +204,128 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 
 <script>
 /* ================= CONFIG ================= */
-const PROXY_API = "/api/proxy?endpoint=";
-const PROXY_VIDEO = "/api/video?url=";
 const USER_ID = "";
-
-/* ================= STATE ================= */
-let state = { loggedIn:false, mode:"mobile", appId:null, batchId:null, topicId:null, batchName:null, topicName:null, classTitle:null };
+let state = { loggedIn:false, batchId:null, topicId:null, batchName:null, topicName:null };
 let hlsInstance = null;
 
-/* ================= API ================= */
+/* ================= API (via proxy) ================= */
 async function apiGet(endpoint, params = {}){
   params.userId = USER_ID;
   const url = `/api/proxy?endpoint=${encodeURIComponent(endpoint)}&` + 
-    Object.entries(params).filter(([,v])=>v).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
-  try {
-    const resp = await fetch(url);
-    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    return await resp.json();
-  } catch(e){ console.error("API Error:", e); return null; }
+    Object.entries(params).filter(([,v])=>v!==undefined&&v!==null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
+  try { const r = await fetch(url); return r.ok ? await r.json() : null; }
+  catch(e){ console.error("API:",e); return null; }
 }
 
 /* ================= LOGIN ================= */
-function setLoginMode(mode){
-  state.mode = mode;
-  document.getElementById("modeMobile").classList.toggle("active", mode==="mobile");
-  document.getElementById("modeEmail").classList.toggle("active", mode==="email");
-  document.getElementById("mobileField").hidden = mode!=="mobile";
-  document.getElementById("emailField").hidden = mode!=="email";
+function setLoginMode(m){
+  state.mode=m;
+  document.getElementById("modeMobile").classList.toggle("active",m==="mobile");
+  document.getElementById("modeEmail").classList.toggle("active",m==="email");
+  document.getElementById("mobileField").hidden=m!=="mobile";
+  document.getElementById("emailField").hidden=m!=="email";
 }
-
 function handleLogin(e){
   e.preventDefault();
-  const errEl = document.getElementById("loginError");
-  errEl.style.display = "none";
+  const err=document.getElementById("loginError");err.style.display="none";
   if(state.mode==="mobile"){
-    const val = document.getElementById("mobileInput").value.trim();
-    if(!/^[6-9]\d{9}$/.test(val)){ errEl.textContent="Enter a valid 10-digit Indian mobile number."; errEl.style.display="block"; return false; }
-    enterApp(true, "+91 "+val);
-  } else {
-    const val = document.getElementById("emailInput").value.trim();
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){ errEl.textContent="Enter a valid email address."; errEl.style.display="block"; return false; }
-    enterApp(true, val);
+    const v=document.getElementById("mobileInput").value.trim();
+    if(!/^[6-9]\d{9}$/.test(v)){err.textContent="Valid 10-digit number";err.style.display="block";return false;}
+    enterApp(true,"+91 "+v);
+  }else{
+    const v=document.getElementById("emailInput").value.trim();
+    if(!v.includes("@")){err.textContent="Valid email";err.style.display="block";return false;}
+    enterApp(true,v);
   }
   return false;
 }
-
-function enterApp(loggedIn, identity){
-  state.loggedIn = loggedIn;
-  document.getElementById("loginScreen").hidden = true;
-  document.getElementById("mainScreen").hidden = false;
-  document.getElementById("userPill").textContent = loggedIn ? identity : "Guest";
-  loadSWMeta(); renderApps(); renderBreadcrumb();
+function enterApp(loggedIn,id){
+  state.loggedIn=loggedIn;
+  document.getElementById("loginScreen").hidden=true;
+  document.getElementById("mainScreen").hidden=false;
+  document.getElementById("userPill").textContent=loggedIn?id:"Guest";
+  loadMeta();renderApps();renderBreadcrumb();
 }
-
-async function loadSWMeta(){
-  const data = await apiGet("courses/active");
-  document.getElementById("swMeta").textContent = (data&&data.data) ? data.data.length+" batches" : "Tap to load";
+async function loadMeta(){
+  const d=await apiGet("courses/active");
+  document.getElementById("swMeta").textContent=(d&&d.data)?d.data.length+" batches":"Tap to load";
 }
-
-function toggleTheme(){ document.body.classList.toggle("dark"); }
+function toggleTheme(){document.body.classList.toggle("dark");}
 
 /* ================= NAVIGATION ================= */
-function showView(name){
-  ["viewApps","viewBatches","viewTopics","viewPlayer"].forEach(v=>document.getElementById(v).hidden=(v!==name));
+function showView(n){
+  ["viewApps","viewBatches","viewTopics","viewPlayer"].forEach(v=>document.getElementById(v).hidden=v!==n);
 }
-
 function renderBreadcrumb(){
-  let parts = [{label:"My Apps", fn:goApps}];
-  if(state.batchId) parts.push({label:state.batchName||"Batch", fn:()=>goBatches('selectionway')});
-  if(state.topicId) parts.push({label:state.topicName||"Topic", fn:()=>goTopics('selectionway',state.batchId,state.batchName)});
-  if(state.classTitle) parts.push({label:state.classTitle, fn:null});
-  const bc = document.getElementById("breadcrumb");
-  bc.innerHTML = parts.map((p,i)=>(i>0?'<span class="arrow">↓</span>':'')+`<span class="crumb ${i===parts.length-1?'current':''}">${p.label}</span>`).join(" ");
-  bc.querySelectorAll(".crumb").forEach((el,i)=>{ if(parts[i].fn) el.onclick=parts[i].fn; });
+  let p=[{l:"My Apps",f:goApps}];
+  if(state.batchId) p.push({l:state.batchName||"Batch",f:()=>goBatches()});
+  if(state.topicId) p.push({l:state.topicName||"Topic",f:null});
+  const bc=document.getElementById("breadcrumb");
+  bc.innerHTML=p.map((x,i)=>(i>0?'<span class="arrow">↓</span>':'')+`<span class="crumb ${i===p.length-1?'current':''}">${x.l}</span>`).join("");
+  bc.querySelectorAll(".crumb").forEach((el,i)=>{if(p[i].f)el.onclick=p[i].f;});
 }
-
-function renderApps(){ showView("viewApps"); renderBreadcrumb(); }
-function goApps(){ 
-  state.appId=null;state.batchId=null;state.topicId=null;state.classTitle=null;state.batchName=null;state.topicName=null;
+function renderApps(){showView("viewApps");renderBreadcrumb();}
+function goApps(){
+  state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;
+  destroyPlayer();renderApps();
+}
+function destroyPlayer(){
   if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}
-  renderApps();
+  const v=document.getElementById("hlsVideo");v.pause();v.removeAttribute("src");v.load();
 }
 
 /* ================= BATCHES ================= */
-async function goBatches(appId){
-  state.appId=appId;state.batchId=null;state.topicId=null;state.classTitle=null;state.batchName=null;state.topicName=null;
-  if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}
+async function goBatches(){
+  state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;
+  destroyPlayer();
   showView("viewBatches");
   document.getElementById("batchesTitle").textContent="Selection Way — All Batches";
   document.getElementById("batchesGrid").innerHTML="";
   document.getElementById("batchesLoading").hidden=false;
   renderBreadcrumb();
 
-  const data = await apiGet("courses/active");
+  const d=await apiGet("courses/active");
   document.getElementById("batchesLoading").hidden=true;
+  if(!d||!d.data||!d.data.length){document.getElementById("batchesGrid").innerHTML='<div class="empty-hint">No batches</div>';return;}
 
-  if(!data||!data.data||!data.data.length){
-    document.getElementById("batchesGrid").innerHTML='<div class="empty-hint" style="padding:20px;">No batches found.</div>';return;
-  }
-  document.getElementById("batchesGrid").innerHTML = data.data.map(b=>{
-    const t=escapeHtml(b.title||'Untitled'), f=escapeHtml((b.facultyDetails||{}).name||"Unknown");
-    return `<div class="nav-card" onclick="goTopics('selectionway','${b.id}','${t}')"><span class="icon">📚</span><h3>${t}</h3><p>${f}</p>
-      <div class="meta">${b.isLive?'<span class="badge badge-live">🔴 LIVE</span>':'<span class="badge badge-vod">📺 VOD</span>'} ${b.isFree?'<span class="badge badge-free">🆓 FREE</span>':'<span class="badge badge-paid">💎 PAID</span>'}</div></div>`;
+  document.getElementById("batchesGrid").innerHTML=d.data.map(b=>{
+    const t=esc(b.title||'Untitled'),f=esc((b.facultyDetails||{}).name||"Unknown");
+    return `<div class="nav-card" onclick="goTopics('${b.id}','${t}')"><span class="icon">📚</span><h3>${t}</h3><p>${f}</p>
+      <div class="meta">${b.isLive?'<span class="badge badge-live">🔴 LIVE</span>':'<span class="badge badge-vod">📺 VOD</span>'} ${b.isFree?'<span class="badge badge-free">🆓</span>':'<span class="badge badge-paid">💎</span>'}</div></div>`;
   }).join("");
 }
 
 /* ================= TOPICS ================= */
-async function goTopics(appId,batchId,batchName){
-  state.appId=appId;state.batchId=batchId;state.topicId=null;state.classTitle=null;state.batchName=batchName;state.topicName=null;
-  if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}
+async function goTopics(batchId,batchName){
+  state.batchId=batchId;state.topicId=null;state.batchName=batchName;state.topicName=null;
+  destroyPlayer();
   showView("viewTopics");
-  document.getElementById("topicsTitle").textContent=batchName||"Topics";
+  document.getElementById("topicsTitle").textContent=batchName;
   document.getElementById("topicsList").innerHTML="";
   document.getElementById("topicsLoading").hidden=false;
   document.getElementById("facultyNote").hidden=true;
   renderBreadcrumb();
 
-  const data = await apiGet("topic-and-section",{courseId:batchId});
+  const d=await apiGet("topic-and-section",{courseId:batchId});
   document.getElementById("topicsLoading").hidden=true;
+  if(!d||!d.data||!d.data.topics||!d.data.topics.length){document.getElementById("topicsList").innerHTML='<div class="empty-hint">No topics</div>';return;}
 
-  if(!data||!data.data||!data.data.topics||!data.data.topics.length){
-    document.getElementById("topicsList").innerHTML='<div class="empty-hint" style="padding:20px;">No topics found.</div>';return;
-  }
-  if(data.data.facultyDetails&&data.data.facultyDetails.name){
+  if(d.data.facultyDetails&&d.data.facultyDetails.name){
     document.getElementById("facultyNote").hidden=false;
-    document.getElementById("facultyName").textContent=data.data.facultyDetails.name;
+    document.getElementById("facultyName").textContent=d.data.facultyDetails.name;
   }
-  document.getElementById("topicsList").innerHTML=data.data.topics.map(t=>
-    `<div class="topic-row" onclick="goPlayer('selectionway','${batchId}','${t.topicId}','${escapeHtml(t.topicName||'Untitled')}')">
-      <div><div class="name">${escapeHtml(t.topicName||'Untitled')}</div><div class="sub">${t.classCount||0} classes</div></div><span class="go">→</span></div>`
+  document.getElementById("topicsList").innerHTML=d.data.topics.map(t=>
+    `<div class="topic-row" onclick="goPlayer('${batchId}','${t.topicId}','${esc(t.topicName||'Untitled')}')">
+      <div><div class="name">${esc(t.topicName||'Untitled')}</div><div class="sub">${t.classCount||0} classes</div></div><span class="go">→</span></div>`
   ).join("");
 }
 
 /* ================= PLAYER ================= */
-async function goPlayer(appId,batchId,topicId,topicName){
-  state.appId=appId;state.batchId=batchId;state.topicId=topicId;state.classTitle=null;state.topicName=topicName;
-  if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}
+async function goPlayer(batchId,topicId,topicName){
+  state.topicId=topicId;state.topicName=topicName;
+  destroyPlayer();
   showView("viewPlayer");
-  document.getElementById("playerTitle").textContent=topicName||"Player";
+  document.getElementById("playerTitle").textContent=topicName;
   document.getElementById("videoList").innerHTML="";
   document.getElementById("pdfList").innerHTML="";
   document.getElementById("pdfViewer").src="";
@@ -358,213 +333,191 @@ async function goPlayer(appId,batchId,topicId,topicName){
   document.getElementById("videoDebug").style.display="none";
   renderBreadcrumb();
 
-  const data = await apiGet(`topics/${topicId}/classes`,{courseId:batchId});
+  const d=await apiGet(`topics/${topicId}/classes`,{courseId:batchId});
   document.getElementById("playerLoading").hidden=true;
-
-  if(!data||!data.data||!data.data.classes||!data.data.classes.length){
-    document.getElementById("videoList").innerHTML='<div class="empty-hint">No classes found.</div>';
-    document.getElementById("pdfList").innerHTML='<div class="empty-hint">No PDFs found.</div>';
+  if(!d||!d.data||!d.data.classes||!d.data.classes.length){
+    document.getElementById("videoList").innerHTML='<div class="empty-hint">No classes</div>';
+    document.getElementById("pdfList").innerHTML='<div class="empty-hint">No PDFs</div>';
     return;
   }
 
-  const videos=[], pdfs=[];
-  data.data.classes.forEach(cls=>{
-    const title=cls.title||"Untitled";
-    if(cls.class_link) videos.push({title, src:cls.class_link, classId:cls.classId});
-    (cls.classPdf||[]).forEach(pdf=>{if(pdf.url) pdfs.push({name:pdf.name||"PDF",src:pdf.url,classTitle:title});});
+  const videos=[],pdfs=[];
+  d.data.classes.forEach(c=>{
+    const t=c.title||"Untitled";
+    // HLS/m3u8 link
+    if(c.class_link) videos.push({title:t,src:c.class_link,type:"hls"});
+    // MP4 recordings (fallback)
+    if(c.mp4Recordings&&c.mp4Recordings.length){
+      c.mp4Recordings.forEach(mp4=>{
+        if(mp4.url) videos.push({title:`${t} [${mp4.quality||'MP4'}]`,src:mp4.url,type:"mp4"});
+      });
+    }
+    // PDFs
+    (c.classPdf||[]).forEach(pdf=>{if(pdf.url) pdfs.push({name:pdf.name||"PDF",src:pdf.url});});
   });
 
-  // Videos
-  const vList=document.getElementById("videoList");
-  if(!videos.length){ vList.innerHTML='<div class="empty-hint">No HLS/m3u8 videos found.</div>'; }
-  else {
-    vList.dataset.videos=JSON.stringify(videos);
-    vList.innerHTML=videos.map((v,i)=>`<div class="list-item ${i===0?'playing':''}" data-idx="${i}" onclick="selectVideo(${i},this)">🎬 ${escapeHtml(v.title)}<br><small style="font-size:10px;opacity:0.7;">${v.src.substring(0,80)}...</small></div>`).join("");
+  // Video list
+  const vl=document.getElementById("videoList");
+  if(!videos.length){vl.innerHTML='<div class="empty-hint">No videos</div>';}
+  else{
+    vl.dataset.videos=JSON.stringify(videos);
+    vl.innerHTML=videos.map((v,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectVideo(${i},this)">
+      🎬 ${esc(v.title)} <span class="badge ${v.type==='mp4'?'badge-free':'badge-vod'}">${v.type.toUpperCase()}</span>
+      <br><small style="opacity:0.6;font-size:10px;">${v.src.substring(0,70)}...</small></div>`).join("");
     playVideo(videos[0]);
   }
 
-  // PDFs
-  const pList=document.getElementById("pdfList");
-  if(!pdfs.length){ pList.innerHTML='<div class="empty-hint">No PDFs found.</div>'; }
-  else {
-    pList.dataset.pdfs=JSON.stringify(pdfs);
-    pList.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" data-idx="${i}" onclick="selectPdf(${i},this)">📄 ${escapeHtml(p.name)}</div>`).join("");
+  // PDF list
+  const pl=document.getElementById("pdfList");
+  if(!pdfs.length){pl.innerHTML='<div class="empty-hint">No PDFs</div>';}
+  else{
+    pl.dataset.pdfs=JSON.stringify(pdfs);
+    pl.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectPdf(${i},this)">📄 ${esc(p.name)}</div>`).join("");
     loadPdf(pdfs[0]);
   }
 }
 
-/* ================= VIDEO PLAYER (FIXED) ================= */
-function selectVideo(i, el){
+/* ================= VIDEO PLAYER ================= */
+function selectVideo(i,el){
   document.querySelectorAll("#videoList .list-item").forEach(x=>x.classList.remove("playing"));
   el.classList.add("playing");
-  const videos = JSON.parse(document.getElementById("videoList").dataset.videos);
-  state.classTitle = videos[i].title;
-  renderBreadcrumb();
-  playVideo(videos[i]);
+  playVideo(JSON.parse(document.getElementById("videoList").dataset.videos)[i]);
 }
 
 function playVideo(v){
-  console.log("🎬 Playing:", v.title);
-  console.log("📡 Source:", v.src);
+  console.log("▶️ Playing:",v.title,v.type,v.src);
+  const video=document.getElementById("hlsVideo");
+  const debug=document.getElementById("videoDebug");
   
-  const videoEl = document.getElementById("hlsVideo");
-  const debugEl = document.getElementById("videoDebug");
+  destroyPlayer();
   
-  // Destroy previous instance
-  if(hlsInstance){ hlsInstance.destroy(); hlsInstance=null; }
+  debug.style.display="block";
+  debug.innerHTML=`<strong>🔗 Source:</strong> ${v.src.substring(0,80)}...<br><strong>📦 Type:</strong> ${v.type}<br><strong>⏳ Status:</strong> Loading via proxy...<br><a href="${v.src}" target="_blank" class="btn-open">📎 Open Raw Link</a>`;
   
-  // Reset video
-  videoEl.pause();
-  videoEl.removeAttribute("src");
-  videoEl.load();
+  // Route through proxy
+  const proxyUrl = `/api/video?url=${encodeURIComponent(v.src)}`;
   
-  // Show debug info
-  debugEl.style.display = "block";
-  debugEl.innerHTML = `🔗 Source: ${v.src.substring(0,100)}...<br>⏳ Loading...`;
+  if(v.type==="mp4" || v.src.includes('.mp4')){
+    debug.innerHTML+=`<br>✅ Direct MP4 (via proxy)`;
+    video.src = proxyUrl;
+    video.play().catch(e=>debug.innerHTML+=`<br>❌ ${e.message}`);
+    return;
+  }
   
-  const src = v.src;
-  
-  // Check if it's an HLS/m3u8 stream
-  const isHLS = src.includes('.m3u8') || src.includes('master.mpd') || 
-                src.includes('cloudfront.net') || src.includes('manifest');
-  
-  if(isHLS && Hls.isSupported()){
-    debugEl.innerHTML += "<br>✅ Using HLS.js";
+  // HLS/m3u8 via HLS.js
+  if(Hls.isSupported()){
+    debug.innerHTML+=`<br>✅ HLS.js supported`;
     
     hlsInstance = new Hls({
       maxBufferLength: 60,
       maxMaxBufferLength: 120,
       enableWorker: true,
       lowLatencyMode: false,
-      backBufferLength: 90,
-      // Handle CORS
+      debug: false,
       xhrSetup: function(xhr, url) {
+        // All requests already go through our proxy (m3u8 rewritten)
         xhr.withCredentials = false;
       }
     });
     
-    hlsInstance.loadSource(src);
-    hlsInstance.attachMedia(videoEl);
+    // Load through proxy
+    hlsInstance.loadSource(proxyUrl);
+    hlsInstance.attachMedia(video);
     
     hlsInstance.on(Hls.Events.MANIFEST_PARSED, function(event, data){
-      console.log("✅ HLS manifest loaded:", data.levels.length, "quality levels");
-      debugEl.innerHTML = `🔗 Source: ${src.substring(0,80)}...<br>✅ Manifest loaded · ${data.levels.length} quality levels<br>▶️ Playing...`;
-      videoEl.play().catch(e => {
-        console.log("Autoplay blocked:", e);
-        debugEl.innerHTML += "<br>⚠️ Click play button to start";
-      });
+      debug.innerHTML+=`<br>✅ Manifest loaded · ${data.levels.length} qualities`;
+      video.play().catch(e=>debug.innerHTML+=`<br>⚠️ Autoplay blocked - click play`);
+    });
+    
+    hlsInstance.on(Hls.Events.LEVEL_LOADED, function(event, data){
+      debug.innerHTML+=`<br>📊 Level ${data.level} loaded · ${data.details.totalduration}s`;
     });
     
     hlsInstance.on(Hls.Events.ERROR, function(event, data){
-      console.error("HLS Error:", data.type, data.details);
-      debugEl.innerHTML += `<br>❌ Error: ${data.details}`;
+      console.error("HLS Error:", data);
+      debug.innerHTML+=`<br>❌ ${data.type}: ${data.details}`;
       
       if(data.fatal){
         switch(data.type){
           case Hls.ErrorTypes.NETWORK_ERROR:
-            debugEl.innerHTML += "<br>🔄 Retrying network...";
+            debug.innerHTML+=`<br>🔄 Retrying...`;
             hlsInstance.startLoad();
             break;
           case Hls.ErrorTypes.MEDIA_ERROR:
-            debugEl.innerHTML += "<br>🔄 Recovering media...";
+            debug.innerHTML+=`<br>🔄 Recovering...`;
             hlsInstance.recoverMediaError();
             break;
           default:
-            debugEl.innerHTML += "<br>❌ Cannot recover";
+            debug.innerHTML+=`<br>💀 Fatal error`;
             hlsInstance.destroy();
             break;
         }
       }
     });
     
-  } else if(videoEl.canPlayType('application/vnd.apple.mpegurl')){
-    // Safari native HLS
-    debugEl.innerHTML += "<br>✅ Using native HLS (Safari)";
-    videoEl.src = src;
-    videoEl.play().catch(()=>{});
+  } else if(video.canPlayType('application/vnd.apple.mpegurl')){
+    // Safari native
+    debug.innerHTML+=`<br>✅ Native HLS (Safari)`;
+    video.src = proxyUrl;
+    video.play().catch(()=>{});
   } else {
-    // Try direct MP4 or fallback
-    debugEl.innerHTML += "<br>⚠️ Trying direct playback...";
-    
-    // Try as MP4
-    if(src.includes('.mp4') || src.includes('.ts')){
-      videoEl.src = src;
-      videoEl.play().catch(e => {
-        debugEl.innerHTML += `<br>❌ Playback failed: ${e.message}`;
-      });
-    } else {
-      // Last resort: try HLS.js anyway
-      debugEl.innerHTML += "<br>🔄 Forcing HLS.js...";
-      
-      hlsInstance = new Hls({
-        maxBufferLength: 60,
-        enableWorker: true,
-        xhrSetup: function(xhr, url) {
-          xhr.withCredentials = false;
-        }
-      });
-      
-      hlsInstance.loadSource(src);
-      hlsInstance.attachMedia(videoEl);
-      
-      hlsInstance.on(Hls.Events.MANIFEST_PARSED, function(){
-        debugEl.innerHTML += "<br>✅ Playing via forced HLS";
-        videoEl.play().catch(()=>{});
-      });
-      
-      hlsInstance.on(Hls.Events.ERROR, function(event, data){
-        debugEl.innerHTML += `<br>❌ HLS failed: ${data.details}<br>📎 Raw URL: <a href="${src}" target="_blank">Open directly</a>`;
-        if(data.fatal) hlsInstance.destroy();
-      });
-    }
+    debug.innerHTML+=`<br>⚠️ No HLS support - try direct link above`;
   }
   
-  // Fallback: show direct link after 5 seconds if nothing plays
-  setTimeout(() => {
-    if(videoEl.paused && videoEl.currentTime === 0){
-      debugEl.innerHTML += `<br><br>📎 <a href="${src}" target="_blank" style="color:var(--accent);">Click here to open video directly</a>`;
+  // Timeout fallback
+  setTimeout(()=>{
+    if(video.paused && video.currentTime===0){
+      debug.innerHTML+=`<br><br>⏰ No playback after 8s<br><a href="${v.src}" target="_blank" class="btn-open">📎 Open Raw Link</a>
+      <br><button class="btn-small" onclick="playVideoRaw('${v.src.replace(/'/g,"\\'")}')">🔄 Retry Direct</button>`;
     }
-  }, 5000);
+  }, 8000);
+}
+
+function playVideoRaw(url){
+  const video=document.getElementById("hlsVideo");
+  const debug=document.getElementById("videoDebug");
+  destroyPlayer();
+  debug.style.display="block";
+  debug.innerHTML=`<strong>🔄 Direct play:</strong> ${url.substring(0,80)}...`;
+  video.src=url;
+  video.play().catch(e=>debug.innerHTML+=`<br>❌ ${e.message}`);
 }
 
 /* ================= PDF ================= */
-function selectPdf(i, el){
+function selectPdf(i,el){
   document.querySelectorAll("#pdfList .list-item").forEach(x=>x.classList.remove("playing"));
   el.classList.add("playing");
   loadPdf(JSON.parse(document.getElementById("pdfList").dataset.pdfs)[i]);
 }
-
 function loadPdf(p){
-  document.getElementById("pdfViewer").src = `https://docs.google.com/gview?url=${encodeURIComponent(p.src)}&embedded=true`;
+  document.getElementById("pdfViewer").src=`https://docs.google.com/gview?url=${encodeURIComponent(p.src)}&embedded=true`;
 }
 
 /* ================= SEARCH ================= */
 async function handleSearch(val){
   val=val.toLowerCase().trim();
-  if(!val){ goApps(); return; }
+  if(!val){goApps();return;}
   showView("viewTopics");
   document.getElementById("topicsTitle").textContent=`Search: "${val}"`;
   document.getElementById("facultyNote").hidden=true;
   document.getElementById("topicsList").innerHTML='<div class="loading-spinner"><div class="spinner"></div> Searching...</div>';
 
-  const data=await apiGet("courses/active");
-  if(!data||!data.data){ document.getElementById("topicsList").innerHTML='<div class="empty-hint">Search failed.</div>'; return; }
-
-  const results=[];
-  for(const b of data.data){
+  const d=await apiGet("courses/active");
+  if(!d||!d.data){document.getElementById("topicsList").innerHTML='<div class="empty-hint">Failed</div>';return;}
+  const r=[];
+  for(const b of d.data){
     if((b.title||'').toLowerCase().includes(val)||((b.facultyDetails||{}).name||'').toLowerCase().includes(val)){
       const td=await apiGet("topic-and-section",{courseId:b.id});
-      if(td&&td.data&&td.data.topics) td.data.topics.forEach(t=>results.push({...t,batchName:b.title,batchId:b.id}));
+      if(td&&td.data&&td.data.topics) td.data.topics.forEach(t=>r.push({...t,batchName:b.title,batchId:b.id}));
     }
   }
-
-  document.getElementById("topicsList").innerHTML=results.length
-    ? results.slice(0,50).map(r=>`<div class="topic-row" onclick="goPlayer('selectionway','${r.batchId}','${r.topicId}','${escapeHtml(r.topicName)}')">
-      <div><div class="name">${escapeHtml(r.topicName)}</div><div class="sub">${escapeHtml(r.batchName)} · ${r.classCount||0} classes</div></div><span class="go">→</span></div>`).join("")
-    : '<div class="empty-hint">No matches found.</div>';
+  document.getElementById("topicsList").innerHTML=r.length?r.slice(0,50).map(x=>
+    `<div class="topic-row" onclick="goPlayer('${x.batchId}','${x.topicId}','${esc(x.topicName)}')">
+      <div><div class="name">${esc(x.topicName)}</div><div class="sub">${esc(x.batchName)} · ${x.classCount||0} classes</div></div><span class="go">→</span></div>`
+  ).join(""):'<div class="empty-hint">No matches</div>';
 }
 
-function escapeHtml(t){const d=document.createElement('div');d.textContent=t||'';return d.innerHTML;}
+function esc(t){const d=document.createElement('div');d.textContent=t||'';return d.innerHTML;}
 </script>
 </body>
 </html>
