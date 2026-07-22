@@ -14,6 +14,7 @@
 body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);transition:background .25s,color .25s;min-height:100vh;}
 h1,h2,h3{font-family:'Space Grotesk',sans-serif;}
 button,input{font-family:inherit;}
+
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
 #loginScreen::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(rgba(41,85,201,0.08) 0 1px,transparent 1px 40px);opacity:.6;pointer-events:none;}
 .login-card{position:relative;width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:34px 30px 28px;max-height:90vh;overflow-y:auto;}
@@ -28,6 +29,9 @@ button,input{font-family:inherit;}
 .field .row{display:flex;align-items:center;border:1px solid var(--border);border-radius:10px;background:var(--rule-bg);overflow:hidden;}
 .field .row .prefix{padding:11px 10px;color:var(--ink-soft);font-size:14px;border-right:1px solid var(--border);}
 .field input{flex:1;border:none;background:transparent;outline:none;padding:11px 12px;color:var(--ink);font-size:14px;}
+.field .pw-row{position:relative;}
+.field .pw-row input{padding-right:40px;}
+.field .pw-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;user-select:none;background:none;border:none;color:var(--ink-soft);}
 .btn-primary{width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;cursor:pointer;margin-top:6px;transition:all .15s;}
 .btn-primary:hover{filter:brightness(1.08);}
 .btn-primary:disabled{opacity:0.6;cursor:not-allowed;}
@@ -38,12 +42,15 @@ button,input{font-family:inherit;}
 .otp-inputs input{width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border:1px solid var(--border);border-radius:10px;background:var(--rule-bg);color:var(--ink);outline:none;}
 .otp-inputs input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
 .timer{text-align:center;font-size:12px;color:var(--ink-soft);margin-bottom:14px;}
+.pswd-strength{font-size:11px;margin-top:4px;}
+
 .main-header{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;background:var(--card);border-bottom:1px solid var(--border);}
 .brand-mark{font-size:24px;font-weight:700;display:flex;align-items:baseline;gap:8px;}
 .brand-mark .tag{font-size:11px;color:var(--ink-soft);letter-spacing:2px;}
 .brand-mark span{color:var(--accent);}
 .header-actions{display:flex;align-items:center;gap:10px;}
-.pill-btn{cursor:pointer;padding:8px 14px;border-radius:20px;background:var(--rule-bg);border:1px solid var(--border);font-size:13px;color:var(--ink-soft);font-weight:500;}
+.pill-btn{cursor:pointer;padding:8px 14px;border-radius:20px;background:var(--rule-bg);border:1px solid var(--border);font-size:13px;color:var(--ink-soft);font-weight:500;display:flex;align-items:center;gap:4px;}
+.pill-btn svg{width:16px;height:16px;}
 .gradient-bar{height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-2));}
 .loading-spinner{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--ink-soft);}
 .spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
@@ -54,7 +61,8 @@ button,input{font-family:inherit;}
 .breadcrumb .crumb{cursor:pointer;}
 .breadcrumb .crumb.current{color:var(--ink-soft);cursor:default;}
 .breadcrumb .arrow{color:var(--ink-soft);font-size:13px;}
-.view{padding:18px 22px 40px;}
+.view{padding:18px 22px 40px;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .view-title{font-size:22px;font-weight:700;margin-bottom:4px;}
 .view-hint{font-family:'Kalam',cursive;color:var(--accent);font-size:14px;margin-bottom:18px;display:inline-block;}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
@@ -88,17 +96,24 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 .video-btn:hover{filter:brightness(1.1);}
 .video-card{text-align:center;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-top:12px;}
 .profile-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
-.profile-card{background:var(--card);border-radius:18px;padding:30px;max-width:450px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.profile-card{background:var(--card);border-radius:18px;padding:30px;max-width:450px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:80vh;overflow-y:auto;}
 .profile-card h2{margin-bottom:20px;text-align:center;}
 .profile-field{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
 .profile-field .label{color:var(--ink-soft);font-size:13px;}
 .profile-field .value{font-weight:600;font-size:14px;}
+.avatar{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin:0 auto 15px;}
 .btn-close{display:block;margin:20px auto 0;padding:10px 30px;background:var(--accent-2);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:600;}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);padding:14px 28px;border-radius:12px;color:#fff;font-weight:600;font-size:14px;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,0.3);animation:toastIn .3s ease;}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,20px)}to{opacity:1;transform:translate(-50%,0)}}
+.remember-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.remember-row input{width:auto;}
+.remember-row label{font-size:13px;color:var(--ink-soft);margin:0;cursor:pointer;}
 [hidden]{display:none!important;}
 </style>
 </head>
 <body>
 
+<!-- ═══════════ LOGIN SCREEN ═══════════ -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="brand">Engineers<span> Babu</span></div>
@@ -107,21 +122,28 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
       <button id="tabLogin" class="active" onclick="showTab('login')">Login</button>
       <button id="tabRegister" onclick="showTab('register')">Register</button>
     </div>
+
+    <!-- LOGIN -->
     <div id="formLogin">
       <div class="field"><label>User ID</label><div class="row"><input type="text" id="loginUserid" placeholder="EB1234" autocomplete="username"></div></div>
-      <div class="field"><label>Password</label><div class="row"><input type="password" id="loginPassword" placeholder="••••••••"></div></div>
+      <div class="field"><label>Password</label><div class="row pw-row"><input type="password" id="loginPassword" placeholder="••••••••"><span class="pw-toggle" onclick="togglePW('loginPassword',this)">👁️</span></div></div>
+      <div class="remember-row"><input type="checkbox" id="rememberMe"><label for="rememberMe">Remember me for 7 days</label></div>
       <div class="error-msg" id="loginError"></div>
       <button class="btn-primary" onclick="doLogin()">Sign In</button>
       <div class="link-text" onclick="showForgotPassword()">Forgot Password?</div>
     </div>
+
+    <!-- REGISTER -->
     <div id="formRegister" hidden>
       <div class="field"><label>Full Name</label><div class="row"><input type="text" id="regName" placeholder="Your full name"></div></div>
       <div class="field"><label>Email ID</label><div class="row"><input type="email" id="regEmail" placeholder="you@example.com"></div></div>
       <div class="field"><label>Mobile Number</label><div class="row"><span class="prefix">+91</span><input type="tel" id="regMobile" placeholder="9876543210" maxlength="10"></div></div>
-      <div class="field"><label>Create Password</label><div class="row"><input type="password" id="regPassword" placeholder="Min 6 characters"></div></div>
+      <div class="field"><label>Create Password</label><div class="row pw-row"><input type="password" id="regPassword" placeholder="Min 6 characters" oninput="checkPasswordStrength(this.value)"><span class="pw-toggle" onclick="togglePW('regPassword',this)">👁️</span></div><div class="pswd-strength" id="passwordStrength"></div></div>
       <div class="error-msg" id="regError"></div>
       <button class="btn-primary" id="regBtn" onclick="startRegistration()">Send Verification Code</button>
     </div>
+
+    <!-- OTP -->
     <div id="formOTP" hidden>
       <div class="login-sub">Enter code sent to <strong id="otpEmail"></strong></div>
       <div class="otp-inputs">
@@ -137,6 +159,8 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
       <button class="btn-primary" id="verifyBtn" onclick="verifyRegistrationOTP()">Verify & Create Account</button>
       <div class="link-text" onclick="goBackToRegister()">← Back</div>
     </div>
+
+    <!-- FORGOT PASSWORD -->
     <div id="formForgot" hidden>
       <div class="login-sub">Enter your registered email</div>
       <div class="field"><label>Email ID</label><div class="row"><input type="email" id="forgotEmail" placeholder="you@example.com"></div></div>
@@ -144,15 +168,19 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
       <button class="btn-primary" onclick="sendResetCode()">Send Reset Code</button>
       <div class="link-text" onclick="showTab('login')">← Back</div>
     </div>
+
+    <!-- RESET PASSWORD -->
     <div id="formReset" hidden>
       <div class="login-sub">Enter code and new password</div>
       <div id="resetUserid" style="text-align:center;font-weight:600;margin-bottom:10px;"></div>
       <div class="field"><label>Reset Code</label><div class="row"><input type="text" id="resetCode" placeholder="6-digit code"></div></div>
-      <div class="field"><label>New Password</label><div class="row"><input type="password" id="resetPassword" placeholder="Min 6 characters"></div></div>
+      <div class="field"><label>New Password</label><div class="row pw-row"><input type="password" id="resetPassword" placeholder="Min 6 characters"><span class="pw-toggle" onclick="togglePW('resetPassword',this)">👁️</span></div></div>
       <div class="error-msg" id="resetError"></div>
       <button class="btn-primary" onclick="resetPassword()">Reset Password</button>
       <div class="link-text" onclick="showTab('login')">← Back</div>
     </div>
+
+    <!-- SUCCESS -->
     <div id="formSuccess" hidden>
       <div style="text-align:center;padding:20px;">
         <div style="font-size:50px;">✅</div>
@@ -165,35 +193,45 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
   </div>
 </div>
 
+<!-- ═══════════ MAIN APP ═══════════ -->
 <div id="mainScreen" hidden>
   <header class="main-header">
     <div class="brand-mark">Engineers<span> Babu</span><span class="tag">· LEARNING</span></div>
     <div class="header-actions">
-      <span class="pill-btn" onclick="showProfile()" style="cursor:pointer;">👤 <span id="userPill">User</span></span>
-      <span class="pill-btn" onclick="logout()" style="cursor:pointer;">🚪</span>
-      <span class="pill-btn" onclick="toggleTheme()">🌙</span>
+      <span class="pill-btn" onclick="showProfile()" title="My Profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="userPill">User</span>
+      </span>
+      <span class="pill-btn" onclick="logout()" title="Logout (Ctrl+Q)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </span>
+      <span class="pill-btn" onclick="toggleTheme()" id="themeIcon" title="Toggle theme">🌙</span>
     </div>
   </header>
   <div class="gradient-bar"></div>
   <div class="search-wrap"><input type="text" id="searchBox" placeholder="Search batches..." onkeyup="handleSearch(this.value)"></div>
   <div class="breadcrumb" id="breadcrumb"></div>
+
   <div class="view" id="viewApps">
     <div class="view-title">My Apps</div><span class="view-hint">↓ tap to open</span>
     <div class="card-grid" id="appsGrid">
       <div class="nav-card" onclick="goBatches()"><span class="icon">🎓</span><h3>Selection Way</h3><p>All batches</p><div class="meta" id="swMeta">Loading...</div></div>
     </div>
   </div>
+
   <div class="view" id="viewBatches" hidden>
     <div class="view-title" id="batchesTitle">Batches</div><span class="view-hint">↓ click any batch</span>
     <div id="batchesLoading" class="loading-spinner"><div class="spinner"></div> Loading...</div>
     <div class="card-grid" id="batchesGrid"></div>
   </div>
+
   <div class="view" id="viewTopics" hidden>
     <div class="view-title" id="topicsTitle">Topics</div>
     <div class="faculty-note" id="facultyNote"><span class="pin"></span><span id="facultyName"></span></div>
     <div id="topicsLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading...</div>
     <div class="topic-list" id="topicsList"></div>
   </div>
+
   <div class="view" id="viewPlayer" hidden>
     <div class="view-title" id="playerTitle">Player</div><span class="view-hint">↓ click to open video</span>
     <div id="playerLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading...</div>
@@ -202,112 +240,66 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
       <div class="panel"><h3>📄 PDF</h3><div id="pdfList"></div><iframe id="pdfViewer" style="width:100%;height:420px;border:none;border-radius:10px;background:var(--rule-bg);margin-top:12px;"></iframe></div>
     </div>
   </div>
+
   <div id="profileModal" class="profile-modal" hidden>
-    <div class="profile-card">
-      <h2>👤 My Profile</h2>
-      <div id="profileContent"><div class="loading-spinner"><div class="spinner"></div> Loading...</div></div>
-      <button class="btn-close" onclick="closeProfile()">Close</button>
-    </div>
+    <div class="profile-card"><h2>👤 My Profile</h2><div id="profileContent"><div class="loading-spinner"><div class="spinner"></div></div></div><button class="btn-close" onclick="closeProfile()">Close</button></div>
   </div>
 </div>
 
 <script>
 const API_PROXY="/api/proxy";
 let state={loggedIn:false,userid:null,username:null,batchId:null,topicId:null,batchName:null,topicName:null};
-let allBatches=[];
-let authToken="";
-let otpTimer=null,otpSeconds=300,regEmail="",regData={};
+let allBatches=[],authToken="",otpTimer=null,otpSeconds=300,regEmail="",regData={};
 
 (function checkSession(){
-  const token=localStorage.getItem("eb_token");
-  const session=localStorage.getItem("eb_session");
-  if(token&&session){
-    try{
-      const data=JSON.parse(session);
-      authToken=token;state.userid=data.userid;state.username=data.username;state.loggedIn=true;
-      document.getElementById("loginScreen").hidden=true;
-      document.getElementById("mainScreen").hidden=false;
-      document.getElementById("userPill").textContent=data.username||data.userid;
-      loadMeta();renderApps();renderBreadcrumb();
-    }catch(e){logout();}
-  }
+  const token=localStorage.getItem("eb_token"),session=localStorage.getItem("eb_session");
+  if(token&&session){try{const d=JSON.parse(session);authToken=token;state.userid=d.userid;state.username=d.username;state.loggedIn=true;document.getElementById("loginScreen").hidden=true;document.getElementById("mainScreen").hidden=false;document.getElementById("userPill").textContent=d.username||d.userid;loadMeta();renderApps();renderBreadcrumb();}catch(e){logout();}}
 })();
 
-async function apiGet(endpoint,params={}){
-  if(!authToken) return null;
-  params.token=authToken;
-  const url=`${API_PROXY}?endpoint=${encodeURIComponent(endpoint)}&`+Object.entries(params).filter(([,v])=>v!==undefined&&v!==null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
-  try{const r=await fetch(url);if(r.status===401){logout();return null;}return r.ok?await r.json():null;}catch(e){return null;}
-}
+async function apiGet(endpoint,params={}){if(!authToken)return null;params.token=authToken;const url=`${API_PROXY}?endpoint=${encodeURIComponent(endpoint)}&`+Object.entries(params).filter(([,v])=>v!==undefined&&v!==null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");try{const r=await fetch(url);if(r.status===401){logout();return null;}return r.ok?await r.json():null;}catch(e){return null;}}
+async function apiPost(endpoint,body){try{const r=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});return await r.json();}catch(e){return{success:false,error:"Network error"};}}
 
-async function apiPost(endpoint,body){
-  try{
-    const r=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-    return await r.json();
-  }catch(e){return{success:false,error:"Network error"};}
-}
+function togglePW(id,el){const i=document.getElementById(id);i.type=i.type==="password"?"text":"password";el.textContent=i.type==="password"?"👁️":"🙈";}
+function checkPasswordStrength(pw){const el=document.getElementById("passwordStrength");if(!el)return;let s=0;if(pw.length>=6)s++;if(pw.length>=8)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;const l=["","Very Weak 🔴","Weak 🟠","Medium 🟡","Strong 🟢","Very Strong 💪"];el.textContent=l[s]||"";el.style.color=["","#dc2626","#ea580c","#ca8a04","#16a34a","#059669"][s];}
 
 function showTab(tab){
-  document.getElementById("tabLogin").classList.toggle("active",tab==="login");
-  document.getElementById("tabRegister").classList.toggle("active",tab==="register");
-  document.getElementById("formLogin").hidden=tab!=="login";
-  document.getElementById("formRegister").hidden=tab!=="register";
-  document.getElementById("formOTP").hidden=true;
-  document.getElementById("formForgot").hidden=true;
-  document.getElementById("formReset").hidden=true;
-  document.getElementById("formSuccess").hidden=true;
-  document.getElementById("loginSubtitle").textContent=tab==="login"?"Login to your account":"Create a new account";
-  clearErrors();
+  document.getElementById("tabLogin").classList.toggle("active",tab==="login");document.getElementById("tabRegister").classList.toggle("active",tab==="register");
+  document.getElementById("formLogin").hidden=tab!=="login";document.getElementById("formRegister").hidden=tab!=="register";
+  document.getElementById("formOTP").hidden=document.getElementById("formForgot").hidden=document.getElementById("formReset").hidden=document.getElementById("formSuccess").hidden=true;
+  document.getElementById("loginSubtitle").textContent=tab==="login"?"Login to your account":"Create a new account";clearErrors();
 }
-
-function showForgotPassword(){
-  document.getElementById("formLogin").hidden=true;document.getElementById("formForgot").hidden=false;
-  document.getElementById("formReset").hidden=true;clearErrors();
-}
-
-function goBackToRegister(){
-  document.getElementById("formOTP").hidden=true;document.getElementById("formRegister").hidden=false;
-  clearInterval(otpTimer);
-}
-
-function clearErrors(){
-  ["loginError","regError","otpError","forgotError","resetError"].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.style.display="none";
-  });
-}
+function showForgotPassword(){document.getElementById("formLogin").hidden=true;document.getElementById("formForgot").hidden=false;document.getElementById("formReset").hidden=true;clearErrors();}
+function goBackToRegister(){document.getElementById("formOTP").hidden=true;document.getElementById("formRegister").hidden=false;clearInterval(otpTimer);}
+function clearErrors(){["loginError","regError","otpError","forgotError","resetError"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display="none";});}
 
 async function doLogin(){
-  const userid=document.getElementById("loginUserid").value.trim();
-  const password=document.getElementById("loginPassword").value;
-  const errEl=document.getElementById("loginError");errEl.style.display="none";
+  const userid=document.getElementById("loginUserid").value.trim(),password=document.getElementById("loginPassword").value,errEl=document.getElementById("loginError");errEl.style.display="none";
   if(!userid||!password){errEl.textContent="Enter User ID and password";errEl.style.display="block";return;}
   const data=await apiPost("/api/login",{userid,password});
   if(data&&data.success){
     authToken=data.token;state.userid=userid;state.username=data.name;state.loggedIn=true;
-    localStorage.setItem("eb_token",authToken);
-    localStorage.setItem("eb_session",JSON.stringify({userid,username:data.name,email:data.email,loginTime:new Date().toISOString()}));
-    document.getElementById("loginScreen").hidden=true;document.getElementById("mainScreen").hidden=false;
-    document.getElementById("userPill").textContent=data.name||userid;
-    loadMeta();renderApps();renderBreadcrumb();
+    localStorage.setItem("eb_token",authToken);localStorage.setItem("eb_session",JSON.stringify({userid,username:data.name,email:data.email,loginTime:new Date().toISOString()}));
+    document.getElementById("loginScreen").hidden=true;document.getElementById("mainScreen").hidden=false;document.getElementById("userPill").textContent=data.name||userid;
+    loadMeta();renderApps();renderBreadcrumb();showToast("Welcome back, "+data.name+"!","success");
   }else{errEl.textContent=(data&&data.error)||"Login failed";errEl.style.display="block";}
 }
 
 function logout(){
-  if(authToken) fetch(`/api/logout?token=${authToken}`);
-  authToken="";localStorage.removeItem("eb_token");localStorage.removeItem("eb_session");
+  if(!confirm("Are you sure you want to logout?"))return;
+  if(authToken)fetch(`/api/logout?token=${authToken}`);authToken="";localStorage.removeItem("eb_token");localStorage.removeItem("eb_session");
   state.loggedIn=false;state.userid=null;state.username=null;state.batchId=null;state.topicId=null;
   document.getElementById("mainScreen").hidden=true;document.getElementById("loginScreen").hidden=false;
   document.getElementById("loginUserid").value="";document.getElementById("loginPassword").value="";showTab("login");
 }
 
 async function showProfile(){
-  document.getElementById("profileModal").hidden=false;
-  document.getElementById("profileContent").innerHTML='<div class="loading-spinner"><div class="spinner"></div> Loading...</div>';
-  const resp=await fetch(`/api/profile?token=${authToken}`);
-  const data=await resp.json();
-  if(data&&data.success&&data.profile){
-    const p=data.profile;
+  document.getElementById("profileModal").hidden=false;document.getElementById("profileContent").innerHTML='<div class="loading-spinner"><div class="spinner"></div></div>';
+  const resp=await fetch(`/api/profile?token=${authToken}`);const data=await resp.json();
+  if(data&&data.success){const p=data.profile;
+    const colors=["#2955c9","#c8404f","#059669","#c98a24","#7c3aed","#db2777"];const ci=p.name.split("").reduce((a,c)=>a+c.charCodeAt(0),0)%colors.length;
+    const initials=p.name.split(" ").map(n=>n[0]).join("").toUpperCase().substring(0,2);
     document.getElementById("profileContent").innerHTML=`
+      <div class="avatar" style="background:${colors[ci]}">${initials}</div>
       <div class="profile-field"><span class="label">User ID</span><span class="value">${esc(p.userid)}</span></div>
       <div class="profile-field"><span class="label">Name</span><span class="value">${esc(p.name)}</span></div>
       <div class="profile-field"><span class="label">Email</span><span class="value">${esc(p.email)}</span></div>
@@ -316,152 +308,59 @@ async function showProfile(){
       <div class="profile-field"><span class="label">Last Login</span><span class="value">${p.last_login?new Date(p.last_login).toLocaleString():'N/A'}</span></div>
       <div class="profile-field"><span class="label">Total Logins</span><span class="value">${p.login_count||0}</span></div>
       <div class="profile-field"><span class="label">Account Type</span><span class="value">${p.is_vip?'⭐ VIP':'Regular'}</span></div>
-    `;
-  }else{
-    document.getElementById("profileContent").innerHTML='<p style="text-align:center;color:var(--accent-2);">Failed to load profile</p>';
-  }
+    `;}else{document.getElementById("profileContent").innerHTML='<p style="text-align:center;color:var(--accent-2);">Failed to load</p>';}
 }
-
 function closeProfile(){document.getElementById("profileModal").hidden=true;}
 
 async function startRegistration(){
-  const name=document.getElementById("regName").value.trim();
-  const email=document.getElementById("regEmail").value.trim().toLowerCase();
-  const mobile=document.getElementById("regMobile").value.trim();
-  const password=document.getElementById("regPassword").value;
-  const errEl=document.getElementById("regError");
-  const btn=document.getElementById("regBtn");
-  errEl.style.display="none";
-  if(!name){errEl.textContent="Enter your name";errEl.style.display="block";return;}
-  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent="Enter valid email";errEl.style.display="block";return;}
-  if(!mobile||mobile.length<10){errEl.textContent="Enter valid 10-digit mobile";errEl.style.display="block";return;}
-  if(password.length<6){errEl.textContent="Password min 6 characters";errEl.style.display="block";return;}
-  regData={name,email,mobile,password};regEmail=email;
-  btn.disabled=true;btn.textContent="Sending...";
-  const data=await apiPost("/api/register-otp",regData);
-  btn.disabled=false;btn.textContent="Send Verification Code";
-  if(data&&data.success){
-    document.getElementById("formRegister").hidden=true;
-    document.getElementById("formOTP").hidden=false;
-    document.getElementById("otpEmail").textContent=email;
-    for(let i=1;i<=6;i++) document.getElementById("o"+i).value="";
-    document.getElementById("o1").focus();
-    otpSeconds=300;startOTPTimer();
-  }else{errEl.textContent=(data&&data.error)||"Failed to send code";errEl.style.display="block";}
+  const name=document.getElementById("regName").value.trim(),email=document.getElementById("regEmail").value.trim().toLowerCase(),mobile=document.getElementById("regMobile").value.trim(),password=document.getElementById("regPassword").value,errEl=document.getElementById("regError"),btn=document.getElementById("regBtn");errEl.style.display="none";
+  if(!name){errEl.textContent="Enter your name";errEl.style.display="block";return;}if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent="Enter valid email";errEl.style.display="block";return;}
+  if(!mobile||mobile.length<10){errEl.textContent="Enter valid 10-digit mobile";errEl.style.display="block";return;}if(password.length<6){errEl.textContent="Password min 6 characters";errEl.style.display="block";return;}
+  regData={name,email,mobile,password};regEmail=email;btn.disabled=true;btn.textContent="Sending...";
+  const data=await apiPost("/api/register-otp",regData);btn.disabled=false;btn.textContent="Send Verification Code";
+  if(data&&data.success){document.getElementById("formRegister").hidden=true;document.getElementById("formOTP").hidden=false;document.getElementById("otpEmail").textContent=email;for(let i=1;i<=6;i++)document.getElementById("o"+i).value="";document.getElementById("o1").focus();otpSeconds=300;startOTPTimer();}
+  else{errEl.textContent=(data&&data.error)||"Failed";errEl.style.display="block";}
 }
 
 async function verifyRegistrationOTP(){
-  const code=[1,2,3,4,5,6].map(i=>document.getElementById("o"+i).value).join("");
-  const errEl=document.getElementById("otpError");
-  const btn=document.getElementById("verifyBtn");
-  errEl.style.display="none";
-  if(code.length!==6){errEl.textContent="Enter complete 6-digit code";errEl.style.display="block";return;}
-  if(otpSeconds<=0){errEl.textContent="Code expired. Request new.";errEl.style.display="block";return;}
-  if(!btn){console.error("Button not found!");return;}
-  btn.disabled=true;btn.textContent="Verifying...";
-  const data=await apiPost("/api/register-verify",{email:regEmail,code:code});
-  btn.disabled=false;btn.textContent="Verify & Create Account";
-  if(data&&data.success){
-    clearInterval(otpTimer);
-    document.getElementById("formOTP").hidden=true;
-    document.getElementById("formSuccess").hidden=false;
-    document.getElementById("newUserid").textContent=data.userid;
-    document.getElementById("loginSubtitle").textContent="Registration Complete";
-  }else{errEl.textContent=(data&&data.error)||"Verification failed";errEl.style.display="block";}
-}
-
-async function sendResetCode(){
-  const email=document.getElementById("forgotEmail").value.trim().toLowerCase();
-  const errEl=document.getElementById("forgotError");
-  const sucEl=document.getElementById("forgotSuccess");
-  errEl.style.display="none";sucEl.style.display="none";
-  if(!email){errEl.textContent="Enter your email";errEl.style.display="block";return;}
-  const data=await apiPost("/api/forgot-password",{email});
-  if(data&&data.success){
-    sucEl.textContent="Code sent! User ID: "+data.userid;sucEl.style.display="block";
-    document.getElementById("formForgot").hidden=true;document.getElementById("formReset").hidden=false;
-    document.getElementById("resetUserid").textContent="User ID: "+data.userid;
-  }else{errEl.textContent=(data&&data.error)||"Failed";errEl.style.display="block";}
-}
-
-async function resetPassword(){
-  const email=document.getElementById("forgotEmail").value.trim().toLowerCase();
-  const code=document.getElementById("resetCode").value.trim();
-  const password=document.getElementById("resetPassword").value;
-  const errEl=document.getElementById("resetError");errEl.style.display="none";
-  if(!code){errEl.textContent="Enter reset code";errEl.style.display="block";return;}
-  if(password.length<6){errEl.textContent="Password min 6 characters";errEl.style.display="block";return;}
-  const data=await apiPost("/api/reset-password",{email,code,password});
-  if(data&&data.success){alert("Password changed!");showTab("login");}
+  const code=[1,2,3,4,5,6].map(i=>document.getElementById("o"+i).value).join(""),errEl=document.getElementById("otpError"),btn=document.getElementById("verifyBtn");errEl.style.display="none";
+  if(code.length!==6){errEl.textContent="Enter complete code";errEl.style.display="block";return;}if(otpSeconds<=0){errEl.textContent="Code expired";errEl.style.display="block";return;}
+  btn.disabled=true;btn.textContent="Verifying...";const data=await apiPost("/api/register-verify",{email:regEmail,code:code});btn.disabled=false;btn.textContent="Verify & Create Account";
+  if(data&&data.success){clearInterval(otpTimer);document.getElementById("formOTP").hidden=true;document.getElementById("formSuccess").hidden=false;document.getElementById("newUserid").textContent=data.userid;}
   else{errEl.textContent=(data&&data.error)||"Failed";errEl.style.display="block";}
 }
+
+async function sendResetCode(){const email=document.getElementById("forgotEmail").value.trim().toLowerCase(),errEl=document.getElementById("forgotError"),sucEl=document.getElementById("forgotSuccess");errEl.style.display="none";sucEl.style.display="none";if(!email){errEl.textContent="Enter email";errEl.style.display="block";return;}const data=await apiPost("/api/forgot-password",{email});if(data&&data.success){sucEl.textContent="Code sent! User ID: "+data.userid;sucEl.style.display="block";document.getElementById("formForgot").hidden=true;document.getElementById("formReset").hidden=false;document.getElementById("resetUserid").textContent="User ID: "+data.userid;}else{errEl.textContent=(data&&data.error)||"Failed";errEl.style.display="block";}}
+async function resetPassword(){const email=document.getElementById("forgotEmail").value.trim().toLowerCase(),code=document.getElementById("resetCode").value.trim(),password=document.getElementById("resetPassword").value,errEl=document.getElementById("resetError");errEl.style.display="none";if(!code){errEl.textContent="Enter code";errEl.style.display="block";return;}if(password.length<6){errEl.textContent="Min 6 characters";errEl.style.display="block";return;}const data=await apiPost("/api/reset-password",{email,code,password});if(data&&data.success){showToast("Password changed!","success");showTab("login");}else{errEl.textContent=(data&&data.error)||"Failed";errEl.style.display="block";}}
 
 function startOTPTimer(){clearInterval(otpTimer);updateOTPTimer();otpTimer=setInterval(()=>{otpSeconds--;updateOTPTimer();if(otpSeconds<=0){clearInterval(otpTimer);document.getElementById("timer").textContent="Code expired";}},1000);}
 function updateOTPTimer(){const m=Math.floor(otpSeconds/60),s=otpSeconds%60;document.getElementById("timer").textContent=`Expires in ${m}:${s.toString().padStart(2,'0')}`;}
 function otpNext(i){if(i.value.length===1){const n=i.nextElementSibling;if(n)n.focus();}}
 function otpBack(e,i,prev){if(e.key==="Backspace"&&!i.value&&prev)document.getElementById(prev).focus();}
 
-function toggleTheme(){document.body.classList.toggle("dark");}
+function showToast(msg,type="info"){const c={success:"#059669",error:"#dc2626",info:"#2955c9",warning:"#c98a24"};const t=document.createElement("div");t.className="toast";t.style.background=c[type]||c.info;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>{t.style.opacity="0";t.style.transition="opacity .3s";setTimeout(()=>t.remove(),300);},2500);}
+
+function toggleTheme(){document.body.classList.toggle("dark");const d=document.body.classList.contains("dark");localStorage.setItem("eb_theme",d?"dark":"light");document.getElementById("themeIcon").textContent=d?"☀️":"🌙";}
+(function(){const s=localStorage.getItem("eb_theme");if(s==="dark"){document.body.classList.add("dark");document.getElementById("themeIcon").textContent="☀️";}})();
+
 async function loadMeta(){const d=await apiGet("courses/active");document.getElementById("swMeta").textContent=(d&&d.data)?d.data.length+" batches":"Tap to load";}
 function showView(n){["viewApps","viewBatches","viewTopics","viewPlayer"].forEach(v=>document.getElementById(v).hidden=v!==n);}
-function renderBreadcrumb(){
-  let p=[{l:"My Apps",f:goApps}];if(state.batchId) p.push({l:state.batchName||"Batch",f:()=>goBatches()});if(state.topicId) p.push({l:state.topicName||"Topic",f:null});
-  document.getElementById("breadcrumb").innerHTML=p.map((x,i)=>(i>0?'<span class="arrow">↓</span>':'')+`<span class="crumb ${i===p.length-1?'current':''}">${x.l}</span>`).join("");
-  document.querySelectorAll("#breadcrumb .crumb").forEach((el,i)=>{if(p[i].f)el.onclick=p[i].f;});
-}
+function renderBreadcrumb(){let p=[{l:"My Apps",f:goApps}];if(state.batchId)p.push({l:state.batchName||"Batch",f:()=>goBatches()});if(state.topicId)p.push({l:state.topicName||"Topic",f:null});document.getElementById("breadcrumb").innerHTML=p.map((x,i)=>(i>0?'<span class="arrow">↓</span>':'')+`<span class="crumb ${i===p.length-1?'current':''}">${x.l}</span>`).join("");document.querySelectorAll("#breadcrumb .crumb").forEach((el,i)=>{if(p[i].f)el.onclick=p[i].f;});}
 function renderApps(){showView("viewApps");renderBreadcrumb();}
 function goApps(){state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;renderApps();}
 
-async function goBatches(){
-  state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;
-  showView("viewBatches");document.getElementById("batchesTitle").textContent="Selection Way";
-  document.getElementById("batchesGrid").innerHTML="";document.getElementById("batchesLoading").hidden=false;renderBreadcrumb();
-  const d=await apiGet("courses/active");document.getElementById("batchesLoading").hidden=true;
-  if(!d||!d.data||!d.data.length){document.getElementById("batchesGrid").innerHTML='<div class="empty-hint">No batches</div>';return;}
-  allBatches=d.data;
-  document.getElementById("batchesGrid").innerHTML=d.data.map(b=>{
-    const t=esc(b.title||'Untitled'),f=esc((b.facultyDetails||{}).name||"Unknown");
-    return `<div class="nav-card" onclick="goTopics('${b.id}','${t}','${f}')"><span class="icon">📚</span><h3>${t}</h3><p>${f}</p><div class="meta">${b.isLive?'<span class="badge badge-live">LIVE</span>':'<span class="badge badge-vod">VOD</span>'} ${b.isFree?'<span class="badge badge-free">FREE</span>':'<span class="badge badge-paid">PAID</span>'}</div></div>`;
-  }).join("");
-}
-
-async function goTopics(batchId,batchName,facultyName){
-  state.batchId=batchId;state.topicId=null;state.batchName=batchName;state.topicName=null;
-  showView("viewTopics");document.getElementById("topicsTitle").textContent=batchName;
-  document.getElementById("topicsList").innerHTML="";document.getElementById("topicsLoading").hidden=false;
-  document.getElementById("facultyNote").hidden=true;renderBreadcrumb();
-  if(facultyName&&facultyName!=="Unknown"){document.getElementById("facultyNote").hidden=false;document.getElementById("facultyName").textContent=facultyName;}
-  const d=await apiGet("topic-and-section",{courseId:batchId});document.getElementById("topicsLoading").hidden=true;
-  if(!d||!d.data||!d.data.topics||!d.data.topics.length){document.getElementById("topicsList").innerHTML='<div class="empty-hint">No topics</div>';return;}
-  document.getElementById("topicsList").innerHTML=d.data.topics.map(t=>`<div class="topic-row" onclick="goPlayer('${batchId}','${t.topicId}','${esc(t.topicName||'Untitled')}')"><div><div class="name">${esc(t.topicName||'Untitled')}</div><div class="sub">${t.classCount||0} classes</div></div><span class="go">→</span></div>`).join("");
-}
-
-async function goPlayer(batchId,topicId,topicName){
-  state.topicId=topicId;state.topicName=topicName;
-  showView("viewPlayer");document.getElementById("playerTitle").textContent=topicName;
-  document.getElementById("videoList").innerHTML="";document.getElementById("pdfList").innerHTML="";
-  document.getElementById("pdfViewer").src="";document.getElementById("playerLoading").hidden=false;renderBreadcrumb();
-  const d=await apiGet(`topics/${topicId}/classes`,{courseId:batchId});document.getElementById("playerLoading").hidden=true;
-  if(!d||!d.data||!d.data.classes||!d.data.classes.length){document.getElementById("videoList").innerHTML='<div class="empty-hint">No classes</div>';document.getElementById("pdfList").innerHTML='<div class="empty-hint">No PDFs</div>';return;}
-  const videos=[],pdfs=[];
-  d.data.classes.forEach(c=>{const t=c.title||"Untitled";if(c.class_link) videos.push({title:t,src:c.class_link});(c.classPdf||[]).forEach(pdf=>{if(pdf.url) pdfs.push({name:pdf.name||"PDF",src:pdf.url});});});
-  document.getElementById("videoList").innerHTML=videos.length?videos.map(v=>`<div class="video-card"><p style="font-weight:600;">🎬 ${esc(v.title)}</p><a href="${v.src}" target="_blank" rel="noopener noreferrer" class="video-btn">▶️ Open Video</a></div>`).join(""):'<div class="empty-hint">No videos</div>';
-  const pl=document.getElementById("pdfList");if(!pdfs.length){pl.innerHTML='<div class="empty-hint">No PDFs</div>';}else{pl.dataset.pdfs=JSON.stringify(pdfs);pl.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectPdf(${i},this)">📄 ${esc(p.name)}</div>`).join("");loadPdf(pdfs[0]);}
-}
-
+async function goBatches(){state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;showView("viewBatches");document.getElementById("batchesTitle").textContent="Selection Way";document.getElementById("batchesGrid").innerHTML="";document.getElementById("batchesLoading").hidden=false;renderBreadcrumb();const d=await apiGet("courses/active");document.getElementById("batchesLoading").hidden=true;if(!d||!d.data||!d.data.length){document.getElementById("batchesGrid").innerHTML='<div class="empty-hint">No batches</div>';return;}allBatches=d.data;document.getElementById("batchesGrid").innerHTML=d.data.map(b=>{const t=esc(b.title||'Untitled'),f=esc((b.facultyDetails||{}).name||"Unknown");return`<div class="nav-card" onclick="goTopics('${b.id}','${t}','${f}')"><span class="icon">📚</span><h3>${t}</h3><p>${f}</p><div class="meta">${b.isLive?'<span class="badge badge-live">LIVE</span>':'<span class="badge badge-vod">VOD</span>'} ${b.isFree?'<span class="badge badge-free">FREE</span>':'<span class="badge badge-paid">PAID</span>'}</div></div>`;}).join("");}
+async function goTopics(batchId,batchName,facultyName){state.batchId=batchId;state.topicId=null;state.batchName=batchName;state.topicName=null;showView("viewTopics");document.getElementById("topicsTitle").textContent=batchName;document.getElementById("topicsList").innerHTML="";document.getElementById("topicsLoading").hidden=false;document.getElementById("facultyNote").hidden=true;renderBreadcrumb();if(facultyName&&facultyName!=="Unknown"){document.getElementById("facultyNote").hidden=false;document.getElementById("facultyName").textContent=facultyName;}const d=await apiGet("topic-and-section",{courseId:batchId});document.getElementById("topicsLoading").hidden=true;if(!d||!d.data||!d.data.topics||!d.data.topics.length){document.getElementById("topicsList").innerHTML='<div class="empty-hint">No topics</div>';return;}document.getElementById("topicsList").innerHTML=d.data.topics.map(t=>`<div class="topic-row" onclick="goPlayer('${batchId}','${t.topicId}','${esc(t.topicName||'Untitled')}')"><div><div class="name">${esc(t.topicName||'Untitled')}</div><div class="sub">${t.classCount||0} classes</div></div><span class="go">→</span></div>`).join("");}
+async function goPlayer(batchId,topicId,topicName){state.topicId=topicId;state.topicName=topicName;showView("viewPlayer");document.getElementById("playerTitle").textContent=topicName;document.getElementById("videoList").innerHTML="";document.getElementById("pdfList").innerHTML="";document.getElementById("pdfViewer").src="";document.getElementById("playerLoading").hidden=false;renderBreadcrumb();const d=await apiGet(`topics/${topicId}/classes`,{courseId:batchId});document.getElementById("playerLoading").hidden=true;if(!d||!d.data||!d.data.classes||!d.data.classes.length){document.getElementById("videoList").innerHTML='<div class="empty-hint">No classes</div>';document.getElementById("pdfList").innerHTML='<div class="empty-hint">No PDFs</div>';return;}const vids=[],pdfs=[];d.data.classes.forEach(c=>{const t=c.title||"Untitled";if(c.class_link)vids.push({title:t,src:c.class_link});(c.classPdf||[]).forEach(pdf=>{if(pdf.url)pdfs.push({name:pdf.name||"PDF",src:pdf.url});});});document.getElementById("videoList").innerHTML=vids.length?vids.map(v=>`<div class="video-card"><p style="font-weight:600;">🎬 ${esc(v.title)}</p><a href="${v.src}" target="_blank" rel="noopener noreferrer" class="video-btn">▶️ Open Video</a></div>`).join(""):'<div class="empty-hint">No videos</div>';const pl=document.getElementById("pdfList");if(!pdfs.length){pl.innerHTML='<div class="empty-hint">No PDFs</div>';}else{pl.dataset.pdfs=JSON.stringify(pdfs);pl.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectPdf(${i},this)">📄 ${esc(p.name)}</div>`).join("");loadPdf(pdfs[0]);}}
 function selectPdf(i,el){document.querySelectorAll("#pdfList .list-item").forEach(x=>x.classList.remove("playing"));el.classList.add("playing");loadPdf(JSON.parse(document.getElementById("pdfList").dataset.pdfs)[i]);}
 function loadPdf(p){document.getElementById("pdfViewer").src=`https://docs.google.com/gview?url=${encodeURIComponent(p.src)}&embedded=true`;}
 
-async function handleSearch(val){
-  val=val.toLowerCase().trim();if(!val){goApps();return;}
-  showView("viewTopics");document.getElementById("topicsTitle").textContent=`Search: "${val}"`;document.getElementById("facultyNote").hidden=true;
-  document.getElementById("topicsList").innerHTML='<div class="loading-spinner"><div class="spinner"></div> Searching...</div>';
-  const d=await apiGet("courses/active");if(!d||!d.data){document.getElementById("topicsList").innerHTML='<div class="empty-hint">Failed</div>';return;}
-  const r=[];for(const b of d.data){if((b.title||'').toLowerCase().includes(val)||((b.facultyDetails||{}).name||'').toLowerCase().includes(val)){const td=await apiGet("topic-and-section",{courseId:b.id});if(td&&td.data&&td.data.topics) td.data.topics.forEach(t=>r.push({...t,batchName:b.title,batchId:b.id}));}}
-  document.getElementById("topicsList").innerHTML=r.length?r.slice(0,50).map(x=>`<div class="topic-row" onclick="goPlayer('${x.batchId}','${x.topicId}','${esc(x.topicName)}')"><div><div class="name">${esc(x.topicName)}</div><div class="sub">${esc(x.batchName)} · ${x.classCount||0} classes</div></div><span class="go">→</span></div>`).join(""):'<div class="empty-hint">No matches</div>';
-}
+async function handleSearch(val){val=val.toLowerCase().trim();if(!val){goApps();return;}showView("viewTopics");document.getElementById("topicsTitle").textContent=`Search: "${val}"`;document.getElementById("facultyNote").hidden=true;document.getElementById("topicsList").innerHTML='<div class="loading-spinner"><div class="spinner"></div></div>';const d=await apiGet("courses/active");if(!d||!d.data){document.getElementById("topicsList").innerHTML='<div class="empty-hint">Failed</div>';return;}const r=[];for(const b of d.data){if((b.title||'').toLowerCase().includes(val)||((b.facultyDetails||{}).name||'').toLowerCase().includes(val)){const td=await apiGet("topic-and-section",{courseId:b.id});if(td&&td.data&&td.data.topics)td.data.topics.forEach(t=>r.push({...t,batchName:b.title,batchId:b.id}));}}document.getElementById("topicsList").innerHTML=r.length?r.slice(0,50).map(x=>`<div class="topic-row" onclick="goPlayer('${x.batchId}','${x.topicId}','${esc(x.topicName)}')"><div><div class="name">${esc(x.topicName)}</div><div class="sub">${esc(x.batchName)} · ${x.classCount||0} classes</div></div><span class="go">→</span></div>`).join(""):'<div class="empty-hint">No matches</div>';}
 
 function esc(t){const d=document.createElement('div');d.textContent=t||'';return d.innerHTML;}
+
+// Keyboard shortcuts
+document.addEventListener("keydown",function(e){if(!state.loggedIn)return;if(e.ctrlKey&&e.key==="b"){e.preventDefault();goBatches();}if(e.ctrlKey&&e.key==="h"){e.preventDefault();goApps();}if(e.key==="Escape"){closeProfile();}});
 </script>
 </body>
 </html>
