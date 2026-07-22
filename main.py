@@ -2,8 +2,7 @@
 """
 Engineers Babu - Koyeb Edition
 ===============================
-Forces ALL video traffic through proxy.
-Server fetches from CloudFront, NOT the browser.
+With detailed error logging for debugging.
 """
 
 import os
@@ -11,9 +10,10 @@ import sys
 import json
 import asyncio
 import random
+import traceback
 from pathlib import Path
 from datetime import datetime
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote, unquote
 
 import aiohttp
 from aiohttp import web
@@ -39,7 +39,7 @@ def get_html():
         return html_path.read_text(encoding="utf-8")
     return "<h1>index.html not found</h1>"
 
-# ─── Browser Spoofing Headers ────────────────────────────────────────────────
+# ─── Headers ─────────────────────────────────────────────────────────────────
 
 def get_browser_headers():
     return {
@@ -83,18 +83,27 @@ async def proxy_handler(request):
                     data = await resp.json()
                     return web.json_response(data, status=resp.status)
         except Exception as e:
+            print(f"API ERROR (attempt {attempt+1}): {e}")
             if attempt == 2:
                 return web.json_response({"error": str(e)}, status=500)
             await asyncio.sleep(random.uniform(1, 3))
 
     return web.json_response({"error": "Max retries"}, status=500)
 
-# ─── Video Proxy ─────────────────────────────────────────────────────────────
+# ─── Video Proxy (WITH FULL ERROR LOGGING) ───────────────────────────────────
 
 async def video_proxy_handler(request):
     video_url = request.query.get("url", "")
     if not video_url:
         return web.Response(text="Missing url", status=400)
+
+    # URL might be double-encoded, decode it
+    video_url = unquote(video_url)
+    
+    print(f"\n{'='*60}")
+    print(f"🎬 VIDEO PROXY REQUEST")
+    print(f"📡 URL: {video_url[:150]}")
+    print(f"{'='*60}")
 
     headers = get_browser_headers()
     headers.update({
@@ -111,13 +120,19 @@ async def video_proxy_handler(request):
         timeout = aiohttp.ClientTimeout(total=120, connect=15)
         connector = aiohttp.TCPConnector(ssl=False, force_close=True, ttl_dns_cache=300)
 
+        print(f"🔗 Connecting to: {video_url[:100]}...")
+        
         async with aiohttp.ClientSession(headers=headers, timeout=timeout, connector=connector) as session:
             async with session.get(video_url, allow_redirects=True) as resp:
-
+                
+                print(f"📥 Response Status: {resp.status}")
+                print(f"📋 Content-Type: {resp.headers.get('Content-Type', 'unknown')}")
+                
                 if resp.status != 200 and resp.status != 206:
-                    print(f"Video fetch failed: {resp.status} for {video_url[:100]}")
+                    body_text = await resp.text()
+                    print(f"❌ Error Body: {body_text[:500]}")
                     return web.Response(
-                        text=f"Upstream returned {resp.status}",
+                        text=f"Upstream returned {resp.status}: {body_text[:200]}",
                         status=resp.status,
                         headers={"Access-Control-Allow-Origin": "*"}
                     )
@@ -139,6 +154,7 @@ async def video_proxy_handler(request):
                         response_headers[h] = resp.headers[h]
 
                 body = await resp.read()
+                print(f"📦 Body size: {len(body)} bytes")
 
                 # Rewrite m3u8
                 is_m3u8 = ".m3u8" in video_url.lower() or (content_type and "mpegurl" in content_type.lower())
@@ -146,9 +162,12 @@ async def video_proxy_handler(request):
                 if is_m3u8:
                     try:
                         body_text = body.decode("utf-8", errors="ignore")
+                        print(f"📝 m3u8 content (first 300 chars):\n{body_text[:300]}")
+                        
                         base_url = video_url.rsplit("/", 1)[0] + "/"
                         lines = body_text.split("\n")
                         new_lines = []
+                        segment_count = 0
 
                         for line in lines:
                             stripped = line.strip()
@@ -162,22 +181,34 @@ async def video_proxy_handler(request):
                                 segment_url = stripped
                             else:
                                 segment_url = urljoin(base_url, stripped)
-                            new_lines.append(f"/api/video?url={segment_url}")
+                            
+                            new_lines.append(f"/api/video?url={quote(segment_url, safe='')}")
+                            segment_count += 1
 
                         body = "\n".join(new_lines).encode("utf-8")
                         response_headers["Content-Length"] = str(len(body))
+                        print(f"✅ Rewrote {segment_count} segments")
+                        
                     except Exception as e:
-                        print(f"m3u8 rewrite error: {e}")
+                        print(f"⚠️ m3u8 rewrite error: {e}")
+                        traceback.print_exc()
 
+                print(f"✅ Sending response ({len(body)} bytes)")
                 return web.Response(body=body, status=200, headers=response_headers)
 
     except asyncio.TimeoutError:
-        return web.Response(text="Timeout", status=504, headers={"Access-Control-Allow-Origin": "*"})
+        print("⏰ TIMEOUT")
+        return web.Response(text="Timeout fetching video", status=504, headers={"Access-Control-Allow-Origin": "*"})
+    except aiohttp.ClientError as e:
+        print(f"🌐 CLIENT ERROR: {e}")
+        traceback.print_exc()
+        return web.Response(text=f"Connection error: {str(e)}", status=502, headers={"Access-Control-Allow-Origin": "*"})
     except Exception as e:
-        print(f"Video proxy error: {e}")
-        return web.Response(text=str(e), status=500, headers={"Access-Control-Allow-Origin": "*"})
+        print(f"💥 UNEXPECTED ERROR: {e}")
+        traceback.print_exc()
+        return web.Response(text=f"Server error: {str(e)}", status=500, headers={"Access-Control-Allow-Origin": "*"})
 
-# ─── CORS Middleware ─────────────────────────────────────────────────────────
+# ─── CORS ────────────────────────────────────────────────────────────────────
 
 @web.middleware
 async def cors_middleware(request, handler):
@@ -188,7 +219,12 @@ async def cors_middleware(request, handler):
             "Access-Control-Allow-Headers": "*",
             "Access-Control-Max-Age": "86400",
         })
-    response = await handler(request)
+    try:
+        response = await handler(request)
+    except Exception as e:
+        print(f"💥 MIDDLEWARE ERROR: {e}")
+        traceback.print_exc()
+        response = web.Response(text=str(e), status=500)
     response.headers["Access-Control-Allow-Origin"] = "*"
     return response
 
@@ -213,8 +249,7 @@ def create_app():
 def main():
     print("""
 ╔══════════════════════════════════════╗
-║  Engineers Babu - Proxy Edition      ║
-║  All video via server (not browser)  ║
+║  Engineers Babu - Debug Edition      ║
 ╚══════════════════════════════════════╝
     """)
     app = create_app()
