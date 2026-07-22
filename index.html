@@ -92,11 +92,7 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 .list-item:hover{border-color:var(--accent);}
 .list-item.playing{background:var(--accent);color:#fff;}
 .empty-hint{color:var(--ink-soft);font-size:13px;font-style:italic;}
-.video-btn{
-  display:inline-block;padding:14px 28px;background:var(--accent);color:#fff;
-  border-radius:12px;text-decoration:none;font-weight:600;font-size:15px;
-  margin:6px 0;transition:filter .15s;
-}
+.video-btn{display:inline-block;padding:14px 28px;background:var(--accent);color:#fff;border-radius:12px;text-decoration:none;font-weight:600;font-size:15px;margin:6px 0;transition:filter .15s;}
 .video-btn:hover{filter:brightness(1.1);}
 .video-card{text-align:center;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-top:12px;}
 [hidden]{display:none!important;}
@@ -149,7 +145,7 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 
   <div class="view" id="viewTopics" hidden>
     <div class="view-title" id="topicsTitle">Topics</div>
-    <div class="faculty-note" id="facultyNote"><span class="pin"></span><span id="view-hint"></span></div>
+    <div class="faculty-note" id="facultyNote"><span class="pin"></span><span id="facultyName"></span></div>
     <div id="topicsLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading...</div>
     <div class="topic-list" id="topicsList"></div>
   </div>
@@ -174,6 +170,7 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 <script>
 const USER_ID="";
 let state={loggedIn:false,batchId:null,topicId:null,batchName:null,topicName:null};
+let allBatches=[];
 
 async function apiGet(endpoint,params={}){
   params.userId=USER_ID;
@@ -232,20 +229,26 @@ async function goBatches(){
   document.getElementById("batchesGrid").innerHTML="";document.getElementById("batchesLoading").hidden=false;renderBreadcrumb();
   const d=await apiGet("courses/active");document.getElementById("batchesLoading").hidden=true;
   if(!d||!d.data||!d.data.length){document.getElementById("batchesGrid").innerHTML='<div class="empty-hint">No batches</div>';return;}
+  allBatches=d.data;
   document.getElementById("batchesGrid").innerHTML=d.data.map(b=>{
     const t=esc(b.title||'Untitled'),f=esc((b.facultyDetails||{}).name||"Unknown");
-    return `<div class="nav-card" onclick="goTopics('${b.id}','${t}')"><span class="icon">📚</span><h3>${t}</h3><p>${f}</p><div class="meta">${b.isLive?'<span class="badge badge-live">🔴 LIVE</span>':'<span class="badge badge-vod">📺 VOD</span>'} ${b.isFree?'<span class="badge badge-free">🆓</span>':'<span class="badge badge-paid">💎</span>'}</div></div>`;
+    return `<div class="nav-card" onclick="goTopics('${b.id}','${t}','${f}')"><span class="icon">📚</span><h3>${t}</h3><p>${f}</p><div class="meta">${b.isLive?'<span class="badge badge-live">🔴 LIVE</span>':'<span class="badge badge-vod">📺 VOD</span>'} ${b.isFree?'<span class="badge badge-free">🆓</span>':'<span class="badge badge-paid">💎</span>'}</div></div>`;
   }).join("");
 }
 
-async function goTopics(batchId,batchName){
+async function goTopics(batchId,batchName,facultyName){
   state.batchId=batchId;state.topicId=null;state.batchName=batchName;state.topicName=null;
   showView("viewTopics");document.getElementById("topicsTitle").textContent=batchName;
   document.getElementById("topicsList").innerHTML="";document.getElementById("topicsLoading").hidden=false;
   document.getElementById("facultyNote").hidden=true;renderBreadcrumb();
+
+  if(facultyName && facultyName!=="Unknown"){
+    document.getElementById("facultyNote").hidden=false;
+    document.getElementById("facultyName").textContent=facultyName;
+  }
+
   const d=await apiGet("topic-and-section",{courseId:batchId});document.getElementById("topicsLoading").hidden=true;
   if(!d||!d.data||!d.data.topics||!d.data.topics.length){document.getElementById("topicsList").innerHTML='<div class="empty-hint">No topics</div>';return;}
-  if(d.data.facultyDetails&&d.data.facultyDetails.name){document.getElementById("facultyNote").hidden=false;document.getElementById("facultyName").textContent=d.data.facultyDetails.name;}
   document.getElementById("topicsList").innerHTML=d.data.topics.map(t=>`<div class="topic-row" onclick="goPlayer('${batchId}','${t.topicId}','${esc(t.topicName||'Untitled')}')"><div><div class="name">${esc(t.topicName||'Untitled')}</div><div class="sub">${t.classCount||0} classes</div></div><span class="go">→</span></div>`).join("");
 }
 
@@ -263,20 +266,18 @@ async function goPlayer(batchId,topicId,topicName){
     (c.classPdf||[]).forEach(pdf=>{if(pdf.url) pdfs.push({name:pdf.name||"PDF",src:pdf.url});});
   });
 
-  // Videos - Open in New Tab (no Origin/Referer blocking)
   const vl=document.getElementById("videoList");
   if(!videos.length){vl.innerHTML='<div class="empty-hint">No videos</div>';}
   else{
-    vl.innerHTML=videos.map((v,i)=>`
+    vl.innerHTML=videos.map(v=>`
       <div class="video-card">
         <p style="font-weight:600;margin-bottom:10px;">🎬 ${esc(v.title)}</p>
         <a href="${v.src}" target="_blank" rel="noopener noreferrer" class="video-btn">▶️ Open Video in New Tab</a>
-        <p style="font-size:11px;color:var(--ink-soft);margin-top:6px;">Opens directly from source · No restrictions</p>
+        <p style="font-size:11px;color:var(--ink-soft);margin-top:6px;">Opens directly from source</p>
       </div>
     `).join("");
   }
 
-  // PDFs
   const pl=document.getElementById("pdfList");
   if(!pdfs.length){pl.innerHTML='<div class="empty-hint">No PDFs</div>';}
   else{pl.dataset.pdfs=JSON.stringify(pdfs);pl.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectPdf(${i},this)">📄 ${esc(p.name)}</div>`).join("");loadPdf(pdfs[0]);}
