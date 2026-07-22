@@ -3,6 +3,8 @@
 Engineers Babu - Koyeb Edition
 ===============================
 Full registration + login system with VIP access.
+Session persistence via localStorage.
+Private log files on server.
 """
 
 import os
@@ -29,6 +31,7 @@ SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 
 USERS_FILE = Path(__file__).parent / "users.json"
 LOG_FILE = Path(__file__).parent / "login_log.txt"
+OTP_FILE = Path(__file__).parent / "otp_store.json"
 
 # ═══════════ VIP ACCOUNT ═══════════
 VIP_USERID = "Enggbabu8564"
@@ -48,11 +51,9 @@ def load_users():
         data = json.loads(USERS_FILE.read_text())
     else:
         data = {"users": {}}
-    
-    # Always ensure VIP exists
     if VIP_USERID not in data["users"]:
         data["users"][VIP_USERID] = VIP_DATA
-    
+        save_users(data)
     return data
 
 def save_users(data):
@@ -87,10 +88,9 @@ def send_email(to_email, subject, body_html):
         return False
 
 # ═══════════ TEMP STORAGE ═══════════
-pending_registrations = {}  # email -> {code, user_data}
-password_reset_codes = {}   # email -> {code, expires}
+pending_registrations = {}
+password_reset_codes = {}
 
-# ═══════════ HTML ═══════════
 def get_html():
     html_path = Path(__file__).parent / "index.html"
     if html_path.exists():
@@ -100,7 +100,6 @@ def get_html():
 # ═══════════ API HANDLERS ═══════════
 
 async def send_registration_otp(request):
-    """Send OTP for registration verification."""
     try:
         data = await request.json()
     except:
@@ -115,8 +114,6 @@ async def send_registration_otp(request):
         return web.json_response({"success": False, "error": "All fields required"})
     
     users = load_users()
-    
-    # Check if email already registered
     for uid, u in users["users"].items():
         if u.get("email") == email:
             return web.json_response({"success": False, "error": "Email already registered"})
@@ -146,7 +143,6 @@ async def send_registration_otp(request):
     return web.json_response({"success": True})
 
 async def verify_registration_otp(request):
-    """Verify registration OTP and create account."""
     try:
         data = await request.json()
     except:
@@ -166,11 +162,9 @@ async def verify_registration_otp(request):
     if code != pending["code"]:
         return web.json_response({"success": False, "error": "Invalid code"})
     
-    # Create user account
     user_data = pending["user_data"]
     userid = f"EB{random.randint(1000, 9999)}"
     
-    # Ensure unique userid
     users = load_users()
     while userid in users["users"]:
         userid = f"EB{random.randint(1000, 9999)}"
@@ -189,7 +183,6 @@ async def verify_registration_otp(request):
     
     log_action("REGISTERED", f"{user_data['name']} <{email}> | UserID: {userid}")
     
-    # Send welcome email with credentials
     welcome_body = f"""
     <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
         <h2 style="color:#2955c9;">Welcome to Engineers Babu!</h2>
@@ -206,7 +199,6 @@ async def verify_registration_otp(request):
     return web.json_response({"success": True, "userid": userid})
 
 async def login_handler(request):
-    """Login with UserID + Password OR VIP credentials."""
     try:
         data = await request.json()
     except:
@@ -219,8 +211,8 @@ async def login_handler(request):
         return web.json_response({"success": False, "error": "UserID and password required"})
     
     users = load_users()
-    
     user = users["users"].get(userid)
+    
     if not user:
         return web.json_response({"success": False, "error": "Invalid UserID or password"})
     
@@ -238,7 +230,6 @@ async def login_handler(request):
     })
 
 async def forgot_password_handler(request):
-    """Send reset code to email."""
     try:
         data = await request.json()
     except:
@@ -247,7 +238,6 @@ async def forgot_password_handler(request):
     email = data.get("email", "")
     users = load_users()
     
-    # Find user by email
     found_userid = None
     found_name = None
     for uid, u in users["users"].items():
@@ -285,7 +275,6 @@ async def forgot_password_handler(request):
     return web.json_response({"success": True, "userid": found_userid})
 
 async def reset_password_handler(request):
-    """Reset password with code."""
     try:
         data = await request.json()
     except:
@@ -380,7 +369,6 @@ def create_app():
 
 def main():
     print("🚀 Engineers Babu starting...")
-    # Initialize VIP account
     load_users()
     if not SMTP_EMAIL:
         print("⚠️ SMTP not configured. OTP shown in server logs.")
