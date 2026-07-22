@@ -54,19 +54,15 @@ button,input{font-family:inherit;}
 .header-actions{display:flex;align-items:center;gap:10px;}
 .pill-btn{cursor:pointer;padding:8px 14px;border-radius:20px;background:var(--rule-bg);border:1px solid var(--border);font-size:13px;color:var(--ink-soft);font-weight:500;}
 .gradient-bar{height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-2));}
-
 .loading-spinner{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--ink-soft);}
 .spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
 .search-wrap{padding:16px 22px 4px;}
 .search-wrap input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);outline:none;background:var(--card);color:var(--ink);font-size:14px;}
-
 .breadcrumb{padding:14px 22px 0;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:15px;color:var(--accent);}
 .breadcrumb .crumb{cursor:pointer;}
 .breadcrumb .crumb.current{color:var(--ink-soft);cursor:default;}
 .breadcrumb .arrow{color:var(--ink-soft);font-size:13px;}
-
 .view{padding:18px 22px 40px;}
 .view-title{font-size:22px;font-weight:700;margin-bottom:4px;}
 .view-hint{font-family:'Kalam',cursive;color:var(--accent);font-size:14px;margin-bottom:18px;display:inline-block;}
@@ -80,17 +76,14 @@ button,input{font-family:inherit;}
 .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;margin-left:4px;}
 .badge-live{background:#fecaca;color:#991b1b;}.badge-vod{background:#dbeafe;color:#1e40af;}
 .badge-free{background:#d1fae5;color:#065f46;}.badge-paid{background:#fef3c7;color:#92400e;}
-
 .faculty-note{display:inline-flex;align-items:center;gap:10px;background:var(--gold);color:#231a04;font-family:'Kalam',cursive;font-weight:700;font-size:15px;padding:10px 16px;border-radius:6px;transform:rotate(-1.5deg);box-shadow:0 6px 14px -6px rgba(0,0,0,0.35);margin-bottom:20px;}
 .faculty-note .pin{width:8px;height:8px;border-radius:50%;background:var(--accent-2);}
-
 .topic-list{display:flex;flex-direction:column;gap:10px;}
 .topic-row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;}
 .topic-row:hover{background:var(--accent-soft);}
 .topic-row .name{font-weight:600;font-size:14.5px;}
 .topic-row .sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
 .topic-row .go{color:var(--accent);font-size:18px;}
-
 .player-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
 @media(max-width:900px){.player-grid{grid-template-columns:1fr;}}
 .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);}
@@ -101,9 +94,6 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 .list-item:hover{border-color:var(--accent);}
 .list-item.playing{background:var(--accent);color:#fff;}
 .empty-hint{color:var(--ink-soft);font-size:13px;font-style:italic;}
-.debug-panel{font-size:11px;margin-top:8px;padding:8px;background:var(--rule-bg);border-radius:6px;word-break:break-all;display:none;max-height:200px;overflow-y:auto;font-family:'JetBrains Mono',monospace;}
-.btn-open{display:inline-block;margin-top:8px;padding:8px 16px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;}
-.btn-small{padding:6px 12px;font-size:11px;background:var(--accent-2);color:#fff;border:none;border-radius:6px;cursor:pointer;margin:4px 4px 0 0;}
 [hidden]{display:none!important;}
 </style>
 </head>
@@ -160,7 +150,7 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
   </div>
 
   <div class="view" id="viewPlayer" hidden>
-    <div class="view-title" id="playerTitle">Player</div><span class="view-hint">↓ click to play · opens in new tab if blocked</span>
+    <div class="view-title" id="playerTitle">Player</div><span class="view-hint">↓ click any video or pdf below</span>
     <div id="playerLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading...</div>
     <div class="player-grid">
       <div class="panel">
@@ -168,7 +158,6 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
         <div id="videoPlayer">
           <video id="hlsVideo" controls autoplay playsinline style="width:100%;border-radius:10px;background:#000;min-height:240px;"></video>
         </div>
-        <div class="debug-panel" id="videoDebug"></div>
         <div id="videoList"></div>
       </div>
       <div class="panel">
@@ -181,15 +170,14 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 </div>
 
 <script>
-const USER_ID = "";
-let state = { loggedIn:false, batchId:null, topicId:null, batchName:null, topicName:null };
-let hlsInstance = null;
+const USER_ID="";
+let state={loggedIn:false,batchId:null,topicId:null,batchName:null,topicName:null};
+let hlsInstance=null;
 
-async function apiGet(endpoint, params = {}){
-  params.userId = USER_ID;
-  const url = `/api/proxy?endpoint=${encodeURIComponent(endpoint)}&` + Object.entries(params).filter(([,v])=>v!==undefined&&v!==null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
-  try { const r = await fetch(url); return r.ok ? await r.json() : null; }
-  catch(e){ console.error("API:",e); return null; }
+async function apiGet(endpoint,params={}){
+  params.userId=USER_ID;
+  const url=`/api/proxy?endpoint=${encodeURIComponent(endpoint)}&`+Object.entries(params).filter(([,v])=>v!==undefined&&v!==null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
+  try{const r=await fetch(url);return r.ok?await r.json():null;}catch(e){return null;}
 }
 
 function setLoginMode(m){
@@ -200,8 +188,7 @@ function setLoginMode(m){
   document.getElementById("emailField").hidden=m!=="email";
 }
 function handleLogin(e){
-  e.preventDefault();
-  const err=document.getElementById("loginError");err.style.display="none";
+  e.preventDefault();const err=document.getElementById("loginError");err.style.display="none";
   if(state.mode==="mobile"){
     const v=document.getElementById("mobileInput").value.trim();
     if(!/^[6-9]\d{9}$/.test(v)){err.textContent="Valid 10-digit number";err.style.display="block";return false;}
@@ -259,42 +246,39 @@ async function goTopics(batchId,batchName){
   const d=await apiGet("topic-and-section",{courseId:batchId});document.getElementById("topicsLoading").hidden=true;
   if(!d||!d.data||!d.data.topics||!d.data.topics.length){document.getElementById("topicsList").innerHTML='<div class="empty-hint">No topics</div>';return;}
   if(d.data.facultyDetails&&d.data.facultyDetails.name){document.getElementById("facultyNote").hidden=false;document.getElementById("facultyName").textContent=d.data.facultyDetails.name;}
-  document.getElementById("topicsList").innerHTML=d.data.topics.map(t=>
-    `<div class="topic-row" onclick="goPlayer('${batchId}','${t.topicId}','${esc(t.topicName||'Untitled')}')"><div><div class="name">${esc(t.topicName||'Untitled')}</div><div class="sub">${t.classCount||0} classes</div></div><span class="go">→</span></div>`
-  ).join("");
+  document.getElementById("topicsList").innerHTML=d.data.topics.map(t=>`<div class="topic-row" onclick="goPlayer('${batchId}','${t.topicId}','${esc(t.topicName||'Untitled')}')"><div><div class="name">${esc(t.topicName||'Untitled')}</div><div class="sub">${t.classCount||0} classes</div></div><span class="go">→</span></div>`).join("");
 }
 
 async function goPlayer(batchId,topicId,topicName){
   state.topicId=topicId;state.topicName=topicName;destroyPlayer();
   showView("viewPlayer");document.getElementById("playerTitle").textContent=topicName;
   document.getElementById("videoList").innerHTML="";document.getElementById("pdfList").innerHTML="";
-  document.getElementById("pdfViewer").src="";document.getElementById("playerLoading").hidden=false;
-  document.getElementById("videoDebug").style.display="none";renderBreadcrumb();
-
+  document.getElementById("pdfViewer").src="";document.getElementById("playerLoading").hidden=false;renderBreadcrumb();
   const d=await apiGet(`topics/${topicId}/classes`,{courseId:batchId});document.getElementById("playerLoading").hidden=true;
   if(!d||!d.data||!d.data.classes||!d.data.classes.length){document.getElementById("videoList").innerHTML='<div class="empty-hint">No classes</div>';document.getElementById("pdfList").innerHTML='<div class="empty-hint">No PDFs</div>';return;}
-
   const videos=[],pdfs=[];
   d.data.classes.forEach(c=>{
     const t=c.title||"Untitled";
-    if(c.class_link) videos.push({title:t,src:c.class_link,type:"hls"});
-    if(c.mp4Recordings&&c.mp4Recordings.length){c.mp4Recordings.forEach(mp4=>{if(mp4.url) videos.push({title:`${t} [${mp4.quality||'MP4'}]`,src:mp4.url,type:"mp4"});});}
+    if(c.class_link) videos.push({title:t,src:c.class_link});
     (c.classPdf||[]).forEach(pdf=>{if(pdf.url) pdfs.push({name:pdf.name||"PDF",src:pdf.url});});
   });
 
+  // Videos
   const vl=document.getElementById("videoList");
   if(!videos.length){vl.innerHTML='<div class="empty-hint">No videos</div>';}
   else{
     vl.dataset.videos=JSON.stringify(videos);
-    vl.innerHTML=videos.map((v,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectVideo(${i},this)">🎬 ${esc(v.title)} <span class="badge ${v.type==='mp4'?'badge-free':'badge-vod'}">${v.type.toUpperCase()}</span></div>`).join("");
+    vl.innerHTML=videos.map((v,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectVideo(${i},this)">🎬 ${esc(v.title)}</div>`).join("");
     playVideo(videos[0]);
   }
 
+  // PDFs
   const pl=document.getElementById("pdfList");
   if(!pdfs.length){pl.innerHTML='<div class="empty-hint">No PDFs</div>';}
   else{pl.dataset.pdfs=JSON.stringify(pdfs);pl.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectPdf(${i},this)">📄 ${esc(p.name)}</div>`).join("");loadPdf(pdfs[0]);}
 }
 
+// ─── VIDEO PLAYER (DIRECT - NO PROXY) ───
 function selectVideo(i,el){
   document.querySelectorAll("#videoList .list-item").forEach(x=>x.classList.remove("playing"));
   el.classList.add("playing");
@@ -302,68 +286,31 @@ function selectVideo(i,el){
 }
 
 function playVideo(v){
-  console.log("▶️",v.title,v.type,v.src);
+  console.log("▶️ Playing DIRECT:",v.title,v.src);
   const video=document.getElementById("hlsVideo");
-  const debug=document.getElementById("videoDebug");
   destroyPlayer();
-  debug.style.display="block";
-  debug.innerHTML=`<strong>📡 Source:</strong> ${v.src.substring(0,100)}...<br><strong>📦 Type:</strong> ${v.type}<br>`;
 
-  // Try direct playback FIRST (not proxy)
-  // Since you can play it in browser tab, let's try direct
-  if(v.type==="mp4"||v.src.includes('.mp4')){
-    debug.innerHTML+=`✅ MP4 Direct Playback<br>`;
-    video.src=v.src;
-    video.play().catch(e=>debug.innerHTML+=`❌ ${e.message}<br>`);
-    // Fallback
-    video.onerror=()=>{
-      debug.innerHTML+=`❌ Direct failed<br><a href="${v.src}" target="_blank" class="btn-open">📎 Open in New Tab</a>`;
-    };
-    return;
-  }
-
-  // HLS - Try direct first, then proxy
-  tryPlayHLS(video, debug, v, v.src, (success)=>{
-    if(!success){
-      debug.innerHTML+=`<br>🔄 Trying via proxy...<br>`;
-      tryPlayHLS(video, debug, v, `/api/video?url=${encodeURIComponent(v.src)}`, (s2)=>{
-        if(!s2){
-          debug.innerHTML+=`<br>❌ All methods failed<br><a href="${v.src}" target="_blank" class="btn-open">📎 Open in New Tab</a>
-          <br><button class="btn-small" onclick="window.open('${v.src}','_blank')">🔗 Open Raw Link</button>`;
-        }
-      });
-    }
-  });
-}
-
-function tryPlayHLS(video, debug, v, src, callback){
+  // Play DIRECTLY - no proxy, no middleware
   if(Hls.isSupported()){
-    debug.innerHTML+=`✅ HLS.js<br>`;
-    hlsInstance=new Hls({maxBufferLength:60,enableWorker:true,debug:false});
-    hlsInstance.loadSource(src);
+    hlsInstance=new Hls({maxBufferLength:60,enableWorker:true});
+    hlsInstance.loadSource(v.src);  // DIRECT URL
     hlsInstance.attachMedia(video);
-    hlsInstance.on(Hls.Events.MANIFEST_PARSED,(e,d)=>{debug.innerHTML+=`✅ ${d.levels.length} qualities<br>`;video.play().catch(()=>{});callback(true);});
-    hlsInstance.on(Hls.Events.ERROR,(e,d)=>{
-      debug.innerHTML+=`❌ ${d.details}<br>`;
-      if(d.fatal){hlsInstance.destroy();callback(false);}
-      else{hlsInstance.startLoad();}
-    });
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{}));
+    hlsInstance.on(Hls.Events.ERROR,(e,d)=>{console.error("HLS Error:",d);if(d.fatal)hlsInstance.destroy();});
   }else if(video.canPlayType('application/vnd.apple.mpegurl')){
-    debug.innerHTML+=`✅ Safari native<br>`;
-    video.src=src;
-    video.onloadedmetadata=()=>{video.play().catch(()=>{});callback(true);};
-    video.onerror=()=>{debug.innerHTML+=`❌ Failed<br>`;callback(false);};
+    video.src=v.src;  // DIRECT URL
+    video.play().catch(()=>{});
   }else{
-    debug.innerHTML+=`⚠️ No HLS<br>`;
-    callback(false);
+    video.src=v.src;  // DIRECT URL - fallback
+    video.play().catch(()=>{});
   }
-  // Timeout
-  setTimeout(()=>{if(video.paused&&video.currentTime===0)callback(false);},10000);
 }
 
+// ─── PDF ───
 function selectPdf(i,el){document.querySelectorAll("#pdfList .list-item").forEach(x=>x.classList.remove("playing"));el.classList.add("playing");loadPdf(JSON.parse(document.getElementById("pdfList").dataset.pdfs)[i]);}
 function loadPdf(p){document.getElementById("pdfViewer").src=`https://docs.google.com/gview?url=${encodeURIComponent(p.src)}&embedded=true`;}
 
+// ─── SEARCH ───
 async function handleSearch(val){
   val=val.toLowerCase().trim();if(!val){goApps();return;}
   showView("viewTopics");document.getElementById("topicsTitle").textContent=`Search: "${val}"`;document.getElementById("facultyNote").hidden=true;
