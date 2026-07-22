@@ -2,7 +2,7 @@
 """
 Engineers Babu - Koyeb Edition
 ===============================
-API proxy + Email OTP verification (no password).
+Full registration + login system with VIP access.
 """
 
 import os
@@ -10,6 +10,7 @@ import sys
 import json
 import asyncio
 import random
+import hashlib
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -26,53 +27,292 @@ USER_ID = os.getenv("USER_ID", "")
 SMTP_EMAIL = os.getenv("SMTP_EMAIL", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 
+USERS_FILE = Path(__file__).parent / "users.json"
+LOG_FILE = Path(__file__).parent / "login_log.txt"
+
+# ═══════════ VIP ACCOUNT ═══════════
+VIP_USERID = "Enggbabu8564"
+VIP_PASSWORD = "gbabu8564"
+VIP_DATA = {
+    "userid": VIP_USERID,
+    "password": hashlib.sha256(VIP_PASSWORD.encode()).hexdigest(),
+    "name": "VIP Member",
+    "email": "vip@engineersbabu.com",
+    "mobile": "",
+    "is_vip": True,
+    "created": datetime.now().isoformat()
+}
+
+def load_users():
+    if USERS_FILE.exists():
+        data = json.loads(USERS_FILE.read_text())
+    else:
+        data = {"users": {}}
+    
+    # Always ensure VIP exists
+    if VIP_USERID not in data["users"]:
+        data["users"][VIP_USERID] = VIP_DATA
+    
+    return data
+
+def save_users(data):
+    USERS_FILE.write_text(json.dumps(data, indent=2))
+
+def log_action(action, detail=""):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open(LOG_FILE, "a") as f:
+        f.write(f"[{timestamp}] {action} | {detail}\n")
+
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def send_email(to_email, subject, body_html):
+    if not SMTP_EMAIL or not SMTP_PASSWORD:
+        print(f"❌ SMTP not configured")
+        return False
+    try:
+        msg = MIMEMultipart()
+        msg["From"] = SMTP_EMAIL
+        msg["To"] = to_email
+        msg["Subject"] = subject
+        msg.attach(MIMEText(body_html, "html"))
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(SMTP_EMAIL, SMTP_PASSWORD)
+        server.sendmail(SMTP_EMAIL, to_email, msg.as_string())
+        server.quit()
+        return True
+    except Exception as e:
+        print(f"❌ Email error: {e}")
+        return False
+
+# ═══════════ TEMP STORAGE ═══════════
+pending_registrations = {}  # email -> {code, user_data}
+password_reset_codes = {}   # email -> {code, expires}
+
+# ═══════════ HTML ═══════════
 def get_html():
     html_path = Path(__file__).parent / "index.html"
     if html_path.exists():
         return html_path.read_text(encoding="utf-8")
     return "<h1>index.html not found</h1>"
 
-def send_email(to_email, code):
-    """Send OTP via Gmail SMTP."""
-    if not SMTP_EMAIL or not SMTP_PASSWORD:
-        print(f"⚠️ SMTP not configured. OTP for {to_email}: {code}")
-        return False
+# ═══════════ API HANDLERS ═══════════
 
+async def send_registration_otp(request):
+    """Send OTP for registration verification."""
     try:
-        msg = MIMEMultipart()
-        msg["From"] = SMTP_EMAIL
-        msg["To"] = to_email
-        msg["Subject"] = "Engineers Babu - Verification Code"
+        data = await request.json()
+    except:
+        return web.json_response({"success": False, "error": "Invalid JSON"}, status=400)
+    
+    email = data.get("email", "")
+    name = data.get("name", "")
+    mobile = data.get("mobile", "")
+    password = data.get("password", "")
+    
+    if not all([email, name, password]):
+        return web.json_response({"success": False, "error": "All fields required"})
+    
+    users = load_users()
+    
+    # Check if email already registered
+    for uid, u in users["users"].items():
+        if u.get("email") == email:
+            return web.json_response({"success": False, "error": "Email already registered"})
+    
+    code = str(random.randint(100000, 999999))
+    pending_registrations[email] = {
+        "code": code,
+        "expires": datetime.now().timestamp() + 300,
+        "user_data": {"name": name, "email": email, "mobile": mobile, "password": hash_password(password)}
+    }
+    
+    body = f"""
+    <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+        <h2 style="color:#2955c9;">Engineers Babu</h2>
+        <p>Hi {name},</p>
+        <p>Your verification code for registration is:</p>
+        <h1 style="font-size:36px;letter-spacing:8px;color:#1b2333;background:#f6f8fc;padding:15px;text-align:center;border-radius:10px;">{code}</h1>
+        <p>This code expires in 5 minutes.</p>
+    </div>
+    """
+    
+    sent = send_email(email, "Verify Your Registration", body)
+    if not sent:
+        print(f"\n📧 Registration OTP for {email}: {code}\n")
+    
+    log_action("REG_OTP_SENT", f"{name} <{email}>")
+    return web.json_response({"success": True})
 
-        body = f"""
-        <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
-            <h2 style="color:#2955c9;">Engineers Babu</h2>
-            <p>Your verification code is:</p>
-            <h1 style="font-size:36px;letter-spacing:8px;color:#1b2333;background:#f6f8fc;padding:15px;text-align:center;border-radius:10px;">{code}</h1>
-            <p>This code expires in 5 minutes.</p>
-            <p style="color:#5b6478;font-size:12px;">If you didn't request this, ignore this email.</p>
+async def verify_registration_otp(request):
+    """Verify registration OTP and create account."""
+    try:
+        data = await request.json()
+    except:
+        return web.json_response({"success": False, "error": "Invalid JSON"}, status=400)
+    
+    email = data.get("email", "")
+    code = data.get("code", "")
+    
+    pending = pending_registrations.get(email)
+    if not pending:
+        return web.json_response({"success": False, "error": "No registration pending"})
+    
+    if datetime.now().timestamp() > pending["expires"]:
+        del pending_registrations[email]
+        return web.json_response({"success": False, "error": "Code expired"})
+    
+    if code != pending["code"]:
+        return web.json_response({"success": False, "error": "Invalid code"})
+    
+    # Create user account
+    user_data = pending["user_data"]
+    userid = f"EB{random.randint(1000, 9999)}"
+    
+    # Ensure unique userid
+    users = load_users()
+    while userid in users["users"]:
+        userid = f"EB{random.randint(1000, 9999)}"
+    
+    users["users"][userid] = {
+        "userid": userid,
+        "password": user_data["password"],
+        "name": user_data["name"],
+        "email": user_data["email"],
+        "mobile": user_data["mobile"],
+        "is_vip": False,
+        "created": datetime.now().isoformat()
+    }
+    save_users(users)
+    del pending_registrations[email]
+    
+    log_action("REGISTERED", f"{user_data['name']} <{email}> | UserID: {userid}")
+    
+    # Send welcome email with credentials
+    welcome_body = f"""
+    <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+        <h2 style="color:#2955c9;">Welcome to Engineers Babu!</h2>
+        <p>Hi {user_data['name']},</p>
+        <p>Your account has been created successfully.</p>
+        <div style="background:#f6f8fc;padding:15px;border-radius:10px;margin:15px 0;">
+            <p><strong>User ID:</strong> {userid}</p>
         </div>
-        """
-        msg.attach(MIMEText(body, "html"))
+        <p>Use your User ID and password to login.</p>
+    </div>
+    """
+    send_email(email, "Welcome to Engineers Babu!", welcome_body)
+    
+    return web.json_response({"success": True, "userid": userid})
 
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(SMTP_EMAIL, SMTP_PASSWORD)
-        server.sendmail(SMTP_EMAIL, to_email, msg.as_string())
-        server.quit()
-        print(f"✅ OTP sent to {to_email}")
-        return True
-    except Exception as e:
-        print(f"❌ Email error: {e}")
-        return False
+async def login_handler(request):
+    """Login with UserID + Password OR VIP credentials."""
+    try:
+        data = await request.json()
+    except:
+        return web.json_response({"success": False, "error": "Invalid JSON"}, status=400)
+    
+    userid = data.get("userid", "").strip()
+    password = data.get("password", "")
+    
+    if not userid or not password:
+        return web.json_response({"success": False, "error": "UserID and password required"})
+    
+    users = load_users()
+    
+    user = users["users"].get(userid)
+    if not user:
+        return web.json_response({"success": False, "error": "Invalid UserID or password"})
+    
+    if hash_password(password) != user["password"]:
+        log_action("LOGIN_FAILED", f"UserID: {userid}")
+        return web.json_response({"success": False, "error": "Invalid UserID or password"})
+    
+    log_action("LOGIN_SUCCESS", f"{user['name']} | UserID: {userid}")
+    
+    return web.json_response({
+        "success": True,
+        "userid": userid,
+        "name": user["name"],
+        "email": user["email"]
+    })
 
-async def send_otp_handler(request):
-    email = request.query.get("email", "")
-    code = request.query.get("code", "")
-    if not email or not code:
-        return web.json_response({"sent": False, "error": "Missing email or code"}, status=400)
-    sent = send_email(email, code)
-    return web.json_response({"sent": sent, "demo": not bool(SMTP_EMAIL)})
+async def forgot_password_handler(request):
+    """Send reset code to email."""
+    try:
+        data = await request.json()
+    except:
+        return web.json_response({"success": False, "error": "Invalid JSON"}, status=400)
+    
+    email = data.get("email", "")
+    users = load_users()
+    
+    # Find user by email
+    found_userid = None
+    found_name = None
+    for uid, u in users["users"].items():
+        if u.get("email") == email:
+            found_userid = uid
+            found_name = u["name"]
+            break
+    
+    if not found_userid:
+        return web.json_response({"success": False, "error": "Email not found"})
+    
+    code = str(random.randint(100000, 999999))
+    password_reset_codes[email] = {
+        "code": code,
+        "expires": datetime.now().timestamp() + 300,
+        "userid": found_userid
+    }
+    
+    body = f"""
+    <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+        <h2 style="color:#2955c9;">Engineers Babu - Password Reset</h2>
+        <p>Hi {found_name},</p>
+        <p>Your password reset code is:</p>
+        <h1 style="font-size:36px;letter-spacing:8px;color:#1b2333;background:#f6f8fc;padding:15px;text-align:center;border-radius:10px;">{code}</h1>
+        <p>Your User ID: <strong>{found_userid}</strong></p>
+        <p>This code expires in 5 minutes.</p>
+    </div>
+    """
+    
+    sent = send_email(email, "Password Reset Code", body)
+    if not sent:
+        print(f"\n📧 Reset code for {email}: {code}\n")
+    
+    log_action("PASSWORD_RESET", f"{found_name} <{email}>")
+    return web.json_response({"success": True, "userid": found_userid})
+
+async def reset_password_handler(request):
+    """Reset password with code."""
+    try:
+        data = await request.json()
+    except:
+        return web.json_response({"success": False, "error": "Invalid JSON"}, status=400)
+    
+    email = data.get("email", "")
+    code = data.get("code", "")
+    new_password = data.get("password", "")
+    
+    reset = password_reset_codes.get(email)
+    if not reset:
+        return web.json_response({"success": False, "error": "No reset requested"})
+    
+    if datetime.now().timestamp() > reset["expires"]:
+        del password_reset_codes[email]
+        return web.json_response({"success": False, "error": "Code expired"})
+    
+    if code != reset["code"]:
+        return web.json_response({"success": False, "error": "Invalid code"})
+    
+    users = load_users()
+    users["users"][reset["userid"]]["password"] = hash_password(new_password)
+    save_users(users)
+    del password_reset_codes[email]
+    
+    log_action("PASSWORD_CHANGED", f"UserID: {reset['userid']}")
+    return web.json_response({"success": True})
 
 async def proxy_handler(request):
     endpoint = request.query.get("endpoint", "")
@@ -113,7 +353,7 @@ async def cors_middleware(request, handler):
     if request.method == "OPTIONS":
         return web.Response(status=204, headers={
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
             "Access-Control-Allow-Headers": "*",
         })
     response = await handler(request)
@@ -131,13 +371,19 @@ def create_app():
     app.router.add_get("/", index_handler)
     app.router.add_get("/health", health_handler)
     app.router.add_get("/api/proxy", proxy_handler)
-    app.router.add_get("/api/send-otp", send_otp_handler)
+    app.router.add_post("/api/register-otp", send_registration_otp)
+    app.router.add_post("/api/register-verify", verify_registration_otp)
+    app.router.add_post("/api/login", login_handler)
+    app.router.add_post("/api/forgot-password", forgot_password_handler)
+    app.router.add_post("/api/reset-password", reset_password_handler)
     return app
 
 def main():
     print("🚀 Engineers Babu starting...")
+    # Initialize VIP account
+    load_users()
     if not SMTP_EMAIL:
-        print("⚠️ SMTP not configured. OTP shown in console/logs.")
+        print("⚠️ SMTP not configured. OTP shown in server logs.")
     app = create_app()
     web.run_app(app, host="0.0.0.0", port=PORT)
 
