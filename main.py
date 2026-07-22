@@ -2,7 +2,7 @@
 """
 Engineers Babu - Koyeb Edition
 ===============================
-API proxy + Email OTP sending via Gmail SMTP.
+API proxy + Email OTP verification (no password).
 """
 
 import os
@@ -23,9 +23,8 @@ PORT = int(os.getenv("PORT", "8080"))
 API_BASE = "https://gdgoenkaratia.com/api"
 USER_ID = os.getenv("USER_ID", "")
 
-# Email configuration (set in Koyeb environment variables)
-SMTP_EMAIL = os.getenv("SMTP_EMAIL", "")      # your@gmail.com
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")  # Gmail app password
+SMTP_EMAIL = os.getenv("SMTP_EMAIL", "")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 
 def get_html():
     html_path = Path(__file__).parent / "index.html"
@@ -36,7 +35,7 @@ def get_html():
 def send_email(to_email, code):
     """Send OTP via Gmail SMTP."""
     if not SMTP_EMAIL or not SMTP_PASSWORD:
-        print("⚠️ SMTP not configured. OTP:", code)
+        print(f"⚠️ SMTP not configured. OTP for {to_email}: {code}")
         return False
 
     try:
@@ -54,7 +53,6 @@ def send_email(to_email, code):
             <p style="color:#5b6478;font-size:12px;">If you didn't request this, ignore this email.</p>
         </div>
         """
-
         msg.attach(MIMEText(body, "html"))
 
         server = smtplib.SMTP("smtp.gmail.com", 587)
@@ -69,15 +67,12 @@ def send_email(to_email, code):
         return False
 
 async def send_otp_handler(request):
-    """Handle OTP sending request."""
     email = request.query.get("email", "")
     code = request.query.get("code", "")
-
     if not email or not code:
         return web.json_response({"sent": False, "error": "Missing email or code"}, status=400)
-
     sent = send_email(email, code)
-    return web.json_response({"sent": sent})
+    return web.json_response({"sent": sent, "demo": not bool(SMTP_EMAIL)})
 
 async def proxy_handler(request):
     endpoint = request.query.get("endpoint", "")
@@ -111,7 +106,6 @@ async def proxy_handler(request):
             if attempt == 2:
                 return web.json_response({"error": str(e)}, status=500)
             await asyncio.sleep(random.uniform(1, 3))
-
     return web.json_response({"error": "Max retries"}, status=500)
 
 @web.middleware
@@ -143,8 +137,7 @@ def create_app():
 def main():
     print("🚀 Engineers Babu starting...")
     if not SMTP_EMAIL:
-        print("⚠️ SMTP not configured. Set SMTP_EMAIL and SMTP_PASSWORD env vars.")
-        print("   OTP codes will be shown in console (demo mode).")
+        print("⚠️ SMTP not configured. OTP shown in console/logs.")
     app = create_app()
     web.run_app(app, host="0.0.0.0", port=PORT)
 
