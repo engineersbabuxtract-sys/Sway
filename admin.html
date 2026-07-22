@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - Engineers Babu</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--accent:#3b82f6;--danger:#ef4444;--success:#22c55e;--warning:#f59e0b;--border:#334155}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--card);padding:20px 30px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px}.header span{color:var(--accent)}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:30px}
+.stat-card{background:var(--card);padding:20px;border-radius:12px;border:1px solid var(--border)}
+.stat-card .number{font-size:32px;font-weight:700}
+.stat-card .label{color:var(--muted);font-size:13px;margin-top:5px}
+.search-bar{display:flex;gap:10px;margin-bottom:20px}
+.search-bar input{flex:1;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;outline:none}
+.search-bar button{padding:12px 20px;background:var(--accent);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:600}
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden}
+th{background:#2d3a4f;padding:12px 15px;text-align:left;font-size:13px;color:var(--muted)}
+td{padding:12px 15px;border-bottom:1px solid var(--border);font-size:14px}
+tr:hover{background:rgba(59,130,246,0.05)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-active{background:rgba(34,197,94,0.2);color:var(--success)}
+.badge-blocked{background:rgba(239,68,68,0.2);color:var(--danger)}
+.badge-vip{background:rgba(245,158,11,0.2);color:var(--warning)}
+.btn{padding:6px 14px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;margin:2px}
+.btn-view{background:var(--accent);color:#fff}
+.btn-block{background:var(--danger);color:#fff}
+.btn-unblock{background:var(--success);color:#fff}
+.btn-delete{background:#6b7280;color:#fff}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1000}
+.modal-content{background:var(--card);border-radius:16px;padding:30px;max-width:700px;width:90%;max-height:80vh;overflow-y:auto;position:relative}
+.modal h2{margin-bottom:20px}
+.modal .field{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.modal .field .label{color:var(--muted);font-size:13px}
+.modal .field .value{font-weight:600;font-size:14px}
+.close-btn{position:absolute;top:10px;right:15px;font-size:24px;cursor:pointer;color:var(--muted);background:none;border:none}
+.pagination{display:flex;gap:5px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.pagination button{padding:8px 14px;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:8px;cursor:pointer}
+.pagination button.active{background:var(--accent);border-color:var(--accent)}
+.login-box{max-width:450px;margin:100px auto;background:var(--card);padding:40px;border-radius:16px;text-align:center}
+.login-box h2{margin-bottom:10px}
+.login-box p{color:var(--muted);font-size:13px;margin-bottom:20px}
+.login-box input{width:100%;padding:12px;margin:10px 0;border-radius:10px;border:1px solid var(--border);background:#0f172a;color:var(--text);outline:none;font-family:monospace;font-size:14px}
+.login-box input:focus{border-color:var(--accent)}
+.login-box label{display:block;text-align:left;font-size:12px;color:var(--muted);margin-top:10px}
+.login-box button{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:600;margin-top:10px;font-size:14px}
+.login-box button:hover{filter:brightness(1.1)}
+.login-box button:disabled{opacity:0.6;cursor:not-allowed}
+.login-box .divider{color:var(--muted);margin:15px 0;font-size:13px}
+.tabs{display:flex;gap:10px;margin-bottom:20px}
+.tab{padding:10px 20px;border:none;border-radius:10px;cursor:pointer;background:var(--card);color:var(--text);font-weight:600}
+.tab.active{background:var(--accent)}
+[hidden]{display:none}
+.error-text{color:var(--danger);font-size:13px;margin-top:5px;display:none}
+.success-text{color:var(--success);font-size:13px;margin-top:5px;display:none}
+.info-box{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);padding:15px;border-radius:10px;margin-bottom:15px;font-size:13px;color:#93c5fd}
+.security-badge{display:inline-block;background:rgba(245,158,11,0.2);color:var(--warning);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- STEP 1: Request OTP -->
+<div id="loginBox">
+    <div class="login-box">
+        <h2>🔐 Admin Panel</h2>
+        <p>One-time secure access via email</p>
+        
+        <div class="info-box">
+            Click below to receive a one-time User ID, Password, and OTP on your registered admin email.
+        </div>
+        
+        <div class="error-text" id="requestError"></div>
+        <div class="success-text" id="requestSuccess"></div>
+        
+        <button id="requestBtn" onclick="requestOTP()">📧 Send Access Credentials</button>
+        
+        <div class="divider">— or —</div>
+        
+        <label>One-Time User ID</label>
+        <input type="text" id="adminUserid" placeholder="ADM-XXXX-XXXX" autocomplete="off">
+        
+        <label>One-Time Password</label>
+        <input type="password" id="adminPassword" placeholder="Enter 20-char password" autocomplete="off">
+        
+        <label>Verification Code (OTP)</label>
+        <input type="text" id="adminOtp" placeholder="6-digit code" maxlength="6" autocomplete="off">
+        
+        <div class="error-text" id="loginError"></div>
+        
+        <button id="loginBtn" onclick="adminLogin()">🔒 Login to Admin Panel</button>
+        
+        <p style="margin-top:15px;font-size:11px;color:var(--muted);">
+            <span class="security-badge">🔐 Secure</span> 
+            Credentials expire in 5 minutes. One-time use only.
+        </p>
+    </div>
+</div>
+
+<!-- MAIN PANEL -->
+<div id="mainPanel" hidden>
+    <div class="header">
+        <h1>Engineers<span> Babu</span> Admin</h1>
+        <div style="display:flex;align-items:center;gap:15px;">
+            <span id="sessionTimer" style="font-size:12px;color:var(--muted);"></span>
+            <button onclick="adminLogout()" style="background:var(--danger);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600;">Logout</button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="stats" id="stats"></div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('users')">👥 Users</button>
+            <button class="tab" onclick="switchTab('logs')">📋 Logs</button>
+        </div>
+        
+        <div id="tabUsers">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search by UserID, Name, Email, Mobile..." onkeyup="if(event.key==='Enter')searchUsers()">
+                <button onclick="searchUsers()">🔍 Search</button>
+            </div>
+            <div id="usersTable"></div>
+            <div class="pagination" id="pagination"></div>
+        </div>
+        
+        <div id="tabLogs" hidden>
+            <div id="logsTable"></div>
+            <div class="pagination" id="logsPagination"></div>
+        </div>
+    </div>
+</div>
+
+<!-- USER DETAIL MODAL -->
+<div id="userModal" class="modal" hidden>
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()">×</button>
+        <h2>👤 User Details</h2>
+        <div id="userDetail"></div>
+    </div>
+</div>
+
+<script>
+let adminToken = localStorage.getItem("admin_token") || "";
+let currentPage = 1;
+let currentTab = "users";
+let sessionTimerInterval = null;
+
+// Check existing session
+if (adminToken) {
+    checkSession();
+}
+
+// ═══════════ STEP 1: REQUEST OTP ═══════════
+async function requestOTP() {
+    const btn = document.getElementById("requestBtn");
+    const errEl = document.getElementById("requestError");
+    const sucEl = document.getElementById("requestSuccess");
+    
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+    errEl.style.display = "none";
+    sucEl.style.display = "none";
+    
+    try {
+        const resp = await fetch("/api/admin/request-otp", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({})
+        });
+        const data = await resp.json();
+        
+        if (data.success) {
+            sucEl.textContent = "✅ Credentials sent to admin email! Check your inbox.";
+            sucEl.style.display = "block";
+        } else {
+            errEl.textContent = "❌ " + (data.error || "Failed to send");
+            errEl.style.display = "block";
+        }
+    } catch (e) {
+        errEl.textContent = "❌ Network error. Try again.";
+        errEl.style.display = "block";
+    }
+    
+    btn.disabled = false;
+    btn.textContent = "📧 Send Access Credentials";
+}
+
+// ═══════════ STEP 2: ADMIN LOGIN ═══════════
+async function adminLogin() {
+    const userid = document.getElementById("adminUserid").value.trim();
+    const password = document.getElementById("adminPassword").value;
+    const otp = document.getElementById("adminOtp").value.trim();
+    const errEl = document.getElementById("loginError");
+    const btn = document.getElementById("loginBtn");
+    
+    errEl.style.display = "none";
+    
+    if (!userid || !password || !otp) {
+        errEl.textContent = "Enter User ID, Password, and OTP from email";
+        errEl.style.display = "block";
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.textContent = "Verifying...";
+    
+    try {
+        const resp = await fetch("/api/admin/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ userid, password, otp })
+        });
+        const data = await resp.json();
+        
+        if (data.success) {
+            adminToken = data.token;
+            localStorage.setItem("admin_token", adminToken);
+            showMainPanel();
+        } else {
+            errEl.textContent = "❌ " + (data.error || "Login failed");
+            errEl.style.display = "block";
+        }
+    } catch (e) {
+        errEl.textContent = "❌ Network error";
+        errEl.style.display = "block";
+    }
+    
+    btn.disabled = false;
+    btn.textContent = "🔒 Login to Admin Panel";
+}
+
+// ═══════════ CHECK SESSION ═══════════
+async function checkSession() {
+    try {
+        const resp = await fetch(`/api/admin/data?token=${adminToken}&action=overview`);
+        if (resp.ok) {
+            showMainPanel();
+        } else {
+            adminToken = "";
+            localStorage.removeItem("admin_token");
+        }
+    } catch (e) {
+        adminToken = "";
+        localStorage.removeItem("admin_token");
+    }
+}
+
+function showMainPanel() {
+    document.getElementById("loginBox").hidden = true;
+    document.getElementById("mainPanel").hidden = false;
+    loadOverview();
+    loadUsers();
+    startSessionTimer();
+}
+
+function adminLogout() {
+    adminToken = "";
+    localStorage.removeItem("admin_token");
+    clearInterval(sessionTimerInterval);
+    document.getElementById("loginBox").hidden = false;
+    document.getElementById("mainPanel").hidden = true;
+    document.getElementById("adminUserid").value = "";
+    document.getElementById("adminPassword").value = "";
+    document.getElementById("adminOtp").value = "";
+}
+
+function startSessionTimer() {
+    let minutes = 30;
+    const timerEl = document.getElementById("sessionTimer");
+    
+    clearInterval(sessionTimerInterval);
+    sessionTimerInterval = setInterval(() => {
+        minutes--;
+        if (minutes <= 0) {
+            clearInterval(sessionTimerInterval);
+            alert("Admin session expired. Please login again.");
+            adminLogout();
+            return;
+        }
+        timerEl.textContent = `⏱️ Session: ${minutes} min`;
+        if (minutes <= 5) {
+            timerEl.style.color = "var(--danger)";
+        }
+    }, 60000);
+    timerEl.textContent = `⏱️ Session: ${minutes} min`;
+}
+
+// ═══════════ DASHBOARD ═══════════
+async function loadOverview() {
+    try {
+        const resp = await fetch(`/api/admin/data?token=${adminToken}&action=overview`);
+        const data = await resp.json();
+        document.getElementById("stats").innerHTML = `
+            <div class="stat-card"><div class="number">${data.total_users}</div><div class="label">Total Users</div></div>
+            <div class="stat-card"><div class="number">${data.active_today}</div><div class="label">Active Today</div></div>
+            <div class="stat-card"><div class="number">${data.total_logins}</div><div class="label">Total Logins</div></div>
+            <div class="stat-card"><div class="number">${data.total_activities_today}</div><div class="label">Activities Today</div></div>
+            <div class="stat-card"><div class="number">${data.blocked_ips}</div><div class="label">Blocked IPs</div></div>
+        `;
+    } catch (e) {
+        console.error("Failed to load overview:", e);
+    }
+}
+
+// ═══════════ USERS TABLE ═══════════
+async function loadUsers(page = 1) {
+    currentPage = page;
+    const search = document.getElementById("searchInput")?.value || "";
+    
+    try {
+        const resp = await fetch(`/api/admin/data?token=${adminToken}&action=users&page=${page}&search=${encodeURIComponent(search)}`);
+        const data = await resp.json();
+        
+        let html = `<table><thead><tr>
+            <th>User ID</th><th>Name</th><th>Email</th><th>Mobile</th>
+            <th>Logins</th><th>Last Login</th><th>Status</th><th>Actions</th>
+        </tr></thead><tbody>`;
+        
+        data.users.forEach(u => {
+            const status = u.account_locked ? '<span class="badge badge-blocked">Blocked</span>' :
+                           u.is_vip ? '<span class="badge badge-vip">VIP</span>' :
+                           '<span class="badge badge-active">Active</span>';
+            html += `<tr>
+                <td>${esc(u.userid)}</td>
+                <td>${esc(u.name)}</td>
+                <td>${esc(u.email)}</td>
+                <td>${esc(u.mobile || 'N/A')}</td>
+                <td>${u.login_count}</td>
+                <td>${u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never'}</td>
+                <td>${status}</td>
+                <td>
+                    <button class="btn btn-view" onclick="viewUser('${u.userid}')">View</button>
+                    ${u.account_locked ? 
+                        `<button class="btn btn-unblock" onclick="unblockUser('${u.userid}')">Unblock</button>` :
+                        `<button class="btn btn-block" onclick="blockUser('${u.userid}')">Block</button>`}
+                    <button class="btn btn-delete" onclick="deleteUser('${u.userid}')">Delete</button>
+                </td>
+            </tr>`;
+        });
+        html += "</tbody></table>";
+        document.getElementById("usersTable").innerHTML = html;
+        
+        let pag = "";
+        for (let i = 1; i <= data.pages; i++) {
+            pag += `<button class="${i === data.page ? 'active' : ''}" onclick="loadUsers(${i})">${i}</button>`;
+        }
+        document.getElementById("pagination").innerHTML = pag;
+    } catch (e) {
+        console.error("Failed to load users:", e);
+    }
+}
+
+function searchUsers() { loadUsers(1); }
+
+// ═══════════ USER DETAIL ═══════════
+async function viewUser(userid) {
+    try {
+        const resp = await fetch(`/api/admin/data?token=${adminToken}&action=user_detail&userid=${userid}`);
+        const data = await resp.json();
+        const u = data.user;
+        
+        let html = `
+            <div class="field"><span class="label">User ID</span><span class="value">${esc(u.userid)}</span></div>
+            <div class="field"><span class="label">Name</span><span class="value">${esc(u.name)}</span></div>
+            <div class="field"><span class="label">Email</span><span class="value">${esc(u.email)}</span></div>
+            <div class="field"><span class="label">Mobile</span><span class="value">${esc(u.mobile||'N/A')}</span></div>
+            <div class="field"><span class="label">Account Type</span><span class="value">${u.is_vip?'⭐ VIP':'Regular'}</span></div>
+            <div class="field"><span class="label">Created</span><span class="value">${new Date(u.created).toLocaleString()}</span></div>
+            <div class="field"><span class="label">Last Login</span><span class="value">${u.last_login?new Date(u.last_login).toLocaleString():'Never'}</span></div>
+            <div class="field"><span class="label">Total Logins</span><span class="value">${u.login_count}</span></div>
+            <div class="field"><span class="label">Last IP</span><span class="value">${esc(u.last_ip||'N/A')}</span></div>
+            <div class="field"><span class="label">Profile Views</span><span class="value">${u.profile_views}</span></div>
+            <div class="field"><span class="label">2FA</span><span class="value">${u.twofa_enabled?'✅ Enabled':'❌ Disabled'}</span></div>
+            <div class="field"><span class="label">Status</span><span class="value">${u.account_locked?'🔒 Blocked: '+esc(u.lock_reason||''):'✅ Active'}</span></div>
+            <div class="field"><span class="label">Active Sessions</span><span class="value">${data.active_sessions.length}</span></div>
+            
+            <h3 style="margin-top:20px;border-top:1px solid var(--border);padding-top:15px;">📋 Recent Login History</h3>
+            ${data.login_history.slice(0,10).map(l => `
+                <div class="field"><span class="label">${new Date(l.timestamp).toLocaleString()}</span><span class="value">${l.action} | ${l.ip} | ${l.device||'Unknown'}</span></div>
+            `).join("") || '<p style="color:var(--muted);">No login history</p>'}
+            
+            <h3 style="margin-top:20px;border-top:1px solid var(--border);padding-top:15px;">📊 Recent Activity</h3>
+            ${data.activities.slice(0,10).map(a => `
+                <div class="field"><span class="label">${new Date(a.timestamp).toLocaleString()}</span><span class="value">${a.action} | Batch: ${a.batch_id||'N/A'}</span></div>
+            `).join("") || '<p style="color:var(--muted);">No recent activity</p>'}
+        `;
+        
+        document.getElementById("userDetail").innerHTML = html;
+        document.getElementById("userModal").hidden = false;
+    } catch (e) {
+        console.error("Failed to load user detail:", e);
+    }
+}
+
+async function blockUser(userid) {
+    if (!confirm("Block this user? They will be logged out immediately.")) return;
+    try {
+        await fetch(`/api/admin/data?token=${adminToken}&action=block_user&userid=${userid}`);
+        loadUsers(currentPage);
+    } catch (e) { console.error(e); }
+}
+
+async function unblockUser(userid) {
+    try {
+        await fetch(`/api/admin/data?token=${adminToken}&action=unblock_user&userid=${userid}`);
+        loadUsers(currentPage);
+    } catch (e) { console.error(e); }
+}
+
+async function deleteUser(userid) {
+    if (!confirm("⚠️ PERMANENTLY DELETE this user and ALL their data?\n\nThis CANNOT be undone!")) return;
+    if (!confirm("Are you ABSOLUTELY sure? Type 'yes' to confirm.")) return;
+    try {
+        await fetch(`/api/admin/data?token=${adminToken}&action=delete_user&userid=${userid}`);
+        loadUsers(currentPage);
+    } catch (e) { console.error(e); }
+}
+
+function closeModal() { document.getElementById("userModal").hidden = true; }
+
+// ═══════════ TABS ═══════════
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    event.target.classList.add("active");
+    document.getElementById("tabUsers").hidden = tab !== "users";
+    document.getElementById("tabLogs").hidden = tab !== "logs";
+    if (tab === "logs") loadLogs();
+}
+
+// ═══════════ LOGS ═══════════
+async function loadLogs(page = 1) {
+    try {
+        const resp = await fetch(`/api/admin/data?token=${adminToken}&action=logs&page=${page}`);
+        const data = await resp.json();
+        
+        let html = `<table><thead><tr><th>Time</th><th>Action</th><th>User</th><th>Email</th><th>IP</th><th>Device</th><th>Detail</th></tr></thead><tbody>`;
+        data.logs.forEach(l => {
+            html += `<tr>
+                <td style="font-size:12px;">${new Date(l.timestamp).toLocaleString()}</td>
+                <td>${l.action}</td>
+                <td>${esc(l.userid||'')}</td>
+                <td>${esc(l.email||'')}</td>
+                <td style="font-size:12px;">${l.ip}</td>
+                <td>${l.device||''}</td>
+                <td style="font-size:12px;">${esc(l.detail||'')}</td>
+            </tr>`;
+        });
+        html += "</tbody></table>";
+        document.getElementById("logsTable").innerHTML = html;
+        
+        const totalPages = Math.ceil(data.total / 50);
+        let pag = "";
+        for (let i = 1; i <= totalPages; i++) {
+            pag += `<button class="${i === page ? 'active' : ''}" onclick="loadLogs(${i})">${i}</button>`;
+        }
+        document.getElementById("logsPagination").innerHTML = pag;
+    } catch (e) {
+        console.error("Failed to load logs:", e);
+    }
+}
+
+function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+
+// Click outside modal to close
+document.getElementById("userModal").addEventListener("click", function(e) {
+    if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
