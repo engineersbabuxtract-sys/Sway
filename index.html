@@ -27,7 +27,7 @@ button,input{font-family:inherit;}
 
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
 #loginScreen::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(rgba(41,85,201,0.08) 0 1px,transparent 1px 40px);opacity:.6;pointer-events:none;}
-.login-card{position:relative;width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:34px 30px 28px;}
+.login-card{position:relative;width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:34px 30px 28px;transition:all .3s ease;}
 .login-card .brand{font-size:26px;font-weight:700;}
 .login-card .brand span{color:var(--accent);}
 .login-sub{color:var(--ink-soft);font-size:13px;margin-top:4px;margin-bottom:22px;}
@@ -41,9 +41,16 @@ button,input{font-family:inherit;}
 .field input{flex:1;border:none;background:transparent;outline:none;padding:11px 12px;color:var(--ink);font-size:14px;}
 .btn-primary{width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;cursor:pointer;margin-top:6px;}
 .btn-primary:hover{filter:brightness(1.08);}
+.btn-primary:disabled{opacity:0.6;cursor:not-allowed;}
 .skip-link{display:block;text-align:center;margin-top:16px;font-size:13px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
 .login-note{margin-top:18px;font-size:12px;color:var(--ink-soft);border-top:1px dashed var(--border);padding-top:12px;}
 .error-msg{color:var(--accent-2);font-size:12px;margin-top:-6px;margin-bottom:10px;display:none;}
+.success-msg{color:#059669;font-size:12px;margin-top:-6px;margin-bottom:10px;display:none;}
+.otp-inputs{display:flex;gap:8px;justify-content:center;margin-bottom:14px;}
+.otp-inputs input{width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border:1px solid var(--border);border-radius:10px;background:var(--rule-bg);color:var(--ink);outline:none;}
+.otp-inputs input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.timer{text-align:center;font-size:12px;color:var(--ink-soft);margin-bottom:14px;}
+.resend-link{text-align:center;font-size:13px;color:var(--accent);cursor:pointer;text-decoration:underline;}
 
 .main-header{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;background:var(--card);border-bottom:1px solid var(--border);}
 .brand-mark{font-size:24px;font-weight:700;display:flex;align-items:baseline;gap:8px;}
@@ -86,7 +93,6 @@ button,input{font-family:inherit;}
 @media(max-width:900px){.player-grid{grid-template-columns:1fr;}}
 .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);}
 .panel h3{font-size:15px;margin-bottom:12px;}
-video{width:100%;border-radius:10px;background:#000;display:block;min-height:240px;}
 iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--rule-bg);}
 .list-item{margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--rule-bg);cursor:pointer;font-size:13.5px;border:1px solid transparent;word-break:break-all;}
 .list-item:hover{border-color:var(--accent);}
@@ -102,22 +108,41 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 <body>
 
 <div id="loginScreen">
-  <div class="login-card">
-    <div class="brand">Engineers<span> Babu</span></div>
-    <div class="login-sub">Sign in or skip to browse.</div>
-    <div class="mode-switch">
-      <button id="modeMobile" class="active" onclick="setLoginMode('mobile')">Mobile</button>
-      <button id="modeEmail" onclick="setLoginMode('email')">Email</button>
+  <div class="login-card" id="loginCard">
+    <!-- STEP 1: Email Input -->
+    <div id="stepEmail">
+      <div class="brand">Engineers<span> Babu</span></div>
+      <div class="login-sub">Sign in with email verification.</div>
+      <div class="field">
+        <label>Email address</label>
+        <div class="row"><input type="email" id="emailInput" placeholder="you@example.com"></div>
+      </div>
+      <div class="error-msg" id="emailError"></div>
+      <button class="btn-primary" onclick="sendOTP()">Send Verification Code</button>
+      <span class="skip-link" onclick="enterApp(false)">Skip → Guest</span>
     </div>
-    <form onsubmit="return handleLogin(event)">
-      <div class="field" id="mobileField"><label>Mobile</label><div class="row"><span class="prefix">+91</span><input type="tel" id="mobileInput" placeholder="98765 43210" maxlength="10"></div></div>
-      <div class="field" id="emailField" hidden><label>Email</label><div class="row"><input type="email" id="emailInput" placeholder="you@example.com"></div></div>
-      <div class="field"><label>Password</label><div class="row"><input type="password" id="passInput" placeholder="••••••••"></div></div>
-      <div class="error-msg" id="loginError"></div>
-      <button class="btn-primary" type="submit">Continue</button>
-    </form>
-    <span class="skip-link" onclick="enterApp(false)">Skip → Guest</span>
-    <div class="login-note">No login required.</div>
+
+    <!-- STEP 2: OTP Verification -->
+    <div id="stepOTP" hidden>
+      <div class="brand">Verify<span> Email</span></div>
+      <div class="login-sub">Code sent to <strong id="otpEmail"></strong></div>
+      <div class="otp-inputs">
+        <input type="text" maxlength="1" id="otp1" oninput="otpNext(this)" onkeydown="otpBack(event,this,null)">
+        <input type="text" maxlength="1" id="otp2" oninput="otpNext(this)" onkeydown="otpBack(event,this,'otp1')">
+        <input type="text" maxlength="1" id="otp3" oninput="otpNext(this)" onkeydown="otpBack(event,this,'otp2')">
+        <input type="text" maxlength="1" id="otp4" oninput="otpNext(this)" onkeydown="otpBack(event,this,'otp3')">
+        <input type="text" maxlength="1" id="otp5" oninput="otpNext(this)" onkeydown="otpBack(event,this,'otp4')">
+        <input type="text" maxlength="1" id="otp6" onkeydown="otpBack(event,this,'otp5')">
+      </div>
+      <div class="error-msg" id="otpError"></div>
+      <div class="success-msg" id="otpSuccess"></div>
+      <div class="timer" id="timer">Code expires in 5:00</div>
+      <button class="btn-primary" onclick="verifyOTP()">Verify & Continue</button>
+      <span class="resend-link" id="resendLink" onclick="sendOTP()" style="display:none;">Resend Code</span>
+      <span class="skip-link" onclick="goBackToEmail()">← Change email</span>
+    </div>
+
+    <div class="login-note">No password needed. We'll send a code to your email.</div>
   </div>
 </div>
 
@@ -154,50 +179,159 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
     <div class="view-title" id="playerTitle">Player</div><span class="view-hint">↓ click to open video in new tab</span>
     <div id="playerLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading...</div>
     <div class="player-grid">
-      <div class="panel">
-        <h3>🎬 Videos</h3>
-        <div id="videoList"></div>
-      </div>
-      <div class="panel">
-        <h3>📄 PDF</h3>
-        <div id="pdfList"></div>
-        <iframe id="pdfViewer" style="width:100%;height:420px;border:none;border-radius:10px;background:var(--rule-bg);margin-top:12px;"></iframe>
-      </div>
+      <div class="panel"><h3>🎬 Videos</h3><div id="videoList"></div></div>
+      <div class="panel"><h3>📄 PDF</h3><div id="pdfList"></div><iframe id="pdfViewer" style="width:100%;height:420px;border:none;border-radius:10px;background:var(--rule-bg);margin-top:12px;"></iframe></div>
     </div>
   </div>
 </div>
 
 <script>
 const USER_ID="";
+const API_PROXY="/api/proxy";
+
 let state={loggedIn:false,batchId:null,topicId:null,batchName:null,topicName:null};
 let allBatches=[];
+let otpCode="";
+let otpTimer=null;
+let otpSeconds=300;
+let currentEmail="";
 
 async function apiGet(endpoint,params={}){
   params.userId=USER_ID;
-  const url=`/api/proxy?endpoint=${encodeURIComponent(endpoint)}&`+Object.entries(params).filter(([,v])=>v!==undefined&&v!==null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
+  const url=`${API_PROXY}?endpoint=${encodeURIComponent(endpoint)}&`+Object.entries(params).filter(([,v])=>v!==undefined&&v!==null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
   try{const r=await fetch(url);return r.ok?await r.json():null;}catch(e){return null;}
 }
 
-function setLoginMode(m){
-  state.mode=m;
-  document.getElementById("modeMobile").classList.toggle("active",m==="mobile");
-  document.getElementById("modeEmail").classList.toggle("active",m==="email");
-  document.getElementById("mobileField").hidden=m!=="mobile";
-  document.getElementById("emailField").hidden=m!=="email";
-}
-function handleLogin(e){
-  e.preventDefault();const err=document.getElementById("loginError");err.style.display="none";
-  if(state.mode==="mobile"){
-    const v=document.getElementById("mobileInput").value.trim();
-    if(!/^[6-9]\d{9}$/.test(v)){err.textContent="Valid 10-digit number";err.style.display="block";return false;}
-    enterApp(true,"+91 "+v);
-  }else{
-    const v=document.getElementById("emailInput").value.trim();
-    if(!v.includes("@")){err.textContent="Valid email";err.style.display="block";return false;}
-    enterApp(true,v);
+// ─── EMAIL VERIFICATION ───
+
+function sendOTP(){
+  const email=document.getElementById("emailInput").value.trim();
+  const errEl=document.getElementById("emailError");
+  errEl.style.display="none";
+
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    errEl.textContent="Please enter a valid email address.";
+    errEl.style.display="block";
+    return;
   }
-  return false;
+
+  // Generate 6-digit OTP
+  otpCode=String(Math.floor(100000+Math.random()*900000));
+  currentEmail=email;
+  otpSeconds=300;
+
+  // Show OTP step
+  document.getElementById("stepEmail").hidden=true;
+  document.getElementById("stepOTP").hidden=false;
+  document.getElementById("otpEmail").textContent=email;
+  document.getElementById("otpError").style.display="none";
+  document.getElementById("otpSuccess").style.display="none";
+  document.getElementById("resendLink").style.display="none";
+  document.getElementById("otp1").value="";
+  document.getElementById("otp2").value="";
+  document.getElementById("otp3").value="";
+  document.getElementById("otp4").value="";
+  document.getElementById("otp5").value="";
+  document.getElementById("otp6").value="";
+  document.getElementById("otp1").focus();
+
+  // Send OTP via server
+  fetch(`${API_PROXY}?endpoint=send-otp&email=${encodeURIComponent(email)}&code=${otpCode}`)
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.sent){
+        document.getElementById("otpSuccess").textContent="✅ Code sent to your email!";
+        document.getElementById("otpSuccess").style.display="block";
+        // For demo: show code in console
+        console.log("📧 OTP for",email,":",otpCode);
+        alert("Demo mode: Your OTP is: "+otpCode+"\n\n(In production, this would be sent to your email)");
+      }
+    })
+    .catch(()=>{
+      // If server doesn't have send-otp endpoint, show OTP directly (demo mode)
+      document.getElementById("otpSuccess").textContent="✅ Demo mode: Check console for code";
+      document.getElementById("otpSuccess").style.display="block";
+      console.log("📧 OTP for",email,":",otpCode);
+      alert("Demo mode: Your OTP is: "+otpCode);
+    });
+
+  // Start timer
+  startOTPTimer();
 }
+
+function startOTPTimer(){
+  clearInterval(otpTimer);
+  otpSeconds=300;
+  updateTimer();
+  otpTimer=setInterval(()=>{
+    otpSeconds--;
+    updateTimer();
+    if(otpSeconds<=0){
+      clearInterval(otpTimer);
+      document.getElementById("timer").textContent="Code expired";
+      document.getElementById("resendLink").style.display="block";
+    }
+  },1000);
+}
+
+function updateTimer(){
+  const m=Math.floor(otpSeconds/60);
+  const s=otpSeconds%60;
+  document.getElementById("timer").textContent=`Code expires in ${m}:${s.toString().padStart(2,'0')}`;
+}
+
+function otpNext(input){
+  if(input.value.length===1){
+    const next=input.nextElementSibling;
+    if(next) next.focus();
+  }
+}
+
+function otpBack(event,input,prevId){
+  if(event.key==="Backspace" && !input.value && prevId){
+    document.getElementById(prevId).focus();
+  }
+}
+
+function verifyOTP(){
+  const entered=document.getElementById("otp1").value+
+                document.getElementById("otp2").value+
+                document.getElementById("otp3").value+
+                document.getElementById("otp4").value+
+                document.getElementById("otp5").value+
+                document.getElementById("otp6").value;
+  const errEl=document.getElementById("otpError");
+
+  if(entered.length!==6){
+    errEl.textContent="Please enter the complete 6-digit code.";
+    errEl.style.display="block";
+    return;
+  }
+
+  if(otpSeconds<=0){
+    errEl.textContent="Code expired. Please request a new one.";
+    errEl.style.display="block";
+    return;
+  }
+
+  if(entered===otpCode){
+    errEl.style.display="none";
+    clearInterval(otpTimer);
+    enterApp(true,currentEmail);
+  }else{
+    errEl.textContent="Invalid code. Please try again.";
+    errEl.style.display="block";
+  }
+}
+
+function goBackToEmail(){
+  clearInterval(otpTimer);
+  document.getElementById("stepOTP").hidden=true;
+  document.getElementById("stepEmail").hidden=false;
+}
+
+// ─── APP ───
+
 function enterApp(loggedIn,id){
   state.loggedIn=loggedIn;
   document.getElementById("loginScreen").hidden=true;
@@ -241,12 +375,7 @@ async function goTopics(batchId,batchName,facultyName){
   showView("viewTopics");document.getElementById("topicsTitle").textContent=batchName;
   document.getElementById("topicsList").innerHTML="";document.getElementById("topicsLoading").hidden=false;
   document.getElementById("facultyNote").hidden=true;renderBreadcrumb();
-
-  if(facultyName && facultyName!=="Unknown"){
-    document.getElementById("facultyNote").hidden=false;
-    document.getElementById("facultyName").textContent=facultyName;
-  }
-
+  if(facultyName&&facultyName!=="Unknown"){document.getElementById("facultyNote").hidden=false;document.getElementById("facultyName").textContent=facultyName;}
   const d=await apiGet("topic-and-section",{courseId:batchId});document.getElementById("topicsLoading").hidden=true;
   if(!d||!d.data||!d.data.topics||!d.data.topics.length){document.getElementById("topicsList").innerHTML='<div class="empty-hint">No topics</div>';return;}
   document.getElementById("topicsList").innerHTML=d.data.topics.map(t=>`<div class="topic-row" onclick="goPlayer('${batchId}','${t.topicId}','${esc(t.topicName||'Untitled')}')"><div><div class="name">${esc(t.topicName||'Untitled')}</div><div class="sub">${t.classCount||0} classes</div></div><span class="go">→</span></div>`).join("");
@@ -260,24 +389,10 @@ async function goPlayer(batchId,topicId,topicName){
   const d=await apiGet(`topics/${topicId}/classes`,{courseId:batchId});document.getElementById("playerLoading").hidden=true;
   if(!d||!d.data||!d.data.classes||!d.data.classes.length){document.getElementById("videoList").innerHTML='<div class="empty-hint">No classes</div>';document.getElementById("pdfList").innerHTML='<div class="empty-hint">No PDFs</div>';return;}
   const videos=[],pdfs=[];
-  d.data.classes.forEach(c=>{
-    const t=c.title||"Untitled";
-    if(c.class_link) videos.push({title:t,src:c.class_link});
-    (c.classPdf||[]).forEach(pdf=>{if(pdf.url) pdfs.push({name:pdf.name||"PDF",src:pdf.url});});
-  });
-
+  d.data.classes.forEach(c=>{const t=c.title||"Untitled";if(c.class_link) videos.push({title:t,src:c.class_link});(c.classPdf||[]).forEach(pdf=>{if(pdf.url) pdfs.push({name:pdf.name||"PDF",src:pdf.url});});});
   const vl=document.getElementById("videoList");
   if(!videos.length){vl.innerHTML='<div class="empty-hint">No videos</div>';}
-  else{
-    vl.innerHTML=videos.map(v=>`
-      <div class="video-card">
-        <p style="font-weight:600;margin-bottom:10px;">🎬 ${esc(v.title)}</p>
-        <a href="${v.src}" target="_blank" rel="noopener noreferrer" class="video-btn">▶️ Open Video in New Tab</a>
-        <p style="font-size:11px;color:var(--ink-soft);margin-top:6px;">Opens directly from source</p>
-      </div>
-    `).join("");
-  }
-
+  else{vl.innerHTML=videos.map(v=>`<div class="video-card"><p style="font-weight:600;margin-bottom:10px;">🎬 ${esc(v.title)}</p><a href="${v.src}" target="_blank" rel="noopener noreferrer" class="video-btn">▶️ Open Video in New Tab</a></div>`).join("");}
   const pl=document.getElementById("pdfList");
   if(!pdfs.length){pl.innerHTML='<div class="empty-hint">No PDFs</div>';}
   else{pl.dataset.pdfs=JSON.stringify(pdfs);pl.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectPdf(${i},this)">📄 ${esc(p.name)}</div>`).join("");loadPdf(pdfs[0]);}
