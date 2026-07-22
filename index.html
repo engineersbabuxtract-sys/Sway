@@ -25,6 +25,7 @@ body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);tra
 h1,h2,h3{font-family:'Space Grotesk',sans-serif;}
 button,input{font-family:inherit;}
 
+/* Login */
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
 #loginScreen::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(rgba(41,85,201,0.08) 0 1px,transparent 1px 40px);opacity:.6;pointer-events:none;}
 .login-card{position:relative;width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:34px 30px 28px;max-height:90vh;overflow-y:auto;}
@@ -45,12 +46,12 @@ button,input{font-family:inherit;}
 .link-text{text-align:center;margin-top:12px;font-size:13px;color:var(--accent);cursor:pointer;text-decoration:underline;}
 .error-msg{color:var(--accent-2);font-size:12px;margin-top:-6px;margin-bottom:10px;display:none;}
 .success-msg{color:#059669;font-size:12px;margin-top:-6px;margin-bottom:10px;display:none;}
-
 .otp-inputs{display:flex;gap:8px;justify-content:center;margin-bottom:14px;}
 .otp-inputs input{width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border:1px solid var(--border);border-radius:10px;background:var(--rule-bg);color:var(--ink);outline:none;}
 .otp-inputs input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
 .timer{text-align:center;font-size:12px;color:var(--ink-soft);margin-bottom:14px;}
 
+/* Main App */
 .main-header{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;background:var(--card);border-bottom:1px solid var(--border);}
 .brand-mark{font-size:24px;font-weight:700;display:flex;align-items:baseline;gap:8px;}
 .brand-mark .tag{font-size:11px;color:var(--ink-soft);letter-spacing:2px;}
@@ -100,6 +101,15 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 .video-btn{display:inline-block;padding:14px 28px;background:var(--accent);color:#fff;border-radius:12px;text-decoration:none;font-weight:600;font-size:15px;margin:6px 0;}
 .video-btn:hover{filter:brightness(1.1);}
 .video-card{text-align:center;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-top:12px;}
+
+/* Profile Modal */
+.profile-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
+.profile-card{background:var(--card);border-radius:18px;padding:30px;max-width:450px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.profile-card h2{margin-bottom:20px;text-align:center;}
+.profile-field{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.profile-field .label{color:var(--ink-soft);font-size:13px;}
+.profile-field .value{font-weight:600;font-size:14px;}
+.btn-close{display:block;margin:20px auto 0;padding:10px 30px;background:var(--accent-2);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:600;}
 [hidden]{display:none!important;}
 </style>
 </head>
@@ -111,13 +121,10 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
   <div class="login-card">
     <div class="brand">Engineers<span> Babu</span></div>
     <div class="login-sub" id="loginSubtitle">Login to your account</div>
-
     <div class="tabs">
       <button id="tabLogin" class="active" onclick="showTab('login')">Login</button>
       <button id="tabRegister" onclick="showTab('register')">Register</button>
     </div>
-
-    <!-- LOGIN FORM -->
     <div id="formLogin">
       <div class="field"><label>User ID</label><div class="row"><input type="text" id="loginUserid" placeholder="EB1234" autocomplete="username"></div></div>
       <div class="field"><label>Password</label><div class="row"><input type="password" id="loginPassword" placeholder="••••••••"></div></div>
@@ -125,8 +132,6 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
       <button class="btn-primary" onclick="doLogin()">Sign In</button>
       <div class="link-text" onclick="showForgotPassword()">Forgot Password?</div>
     </div>
-
-    <!-- REGISTER FORM -->
     <div id="formRegister" hidden>
       <div class="field"><label>Full Name</label><div class="row"><input type="text" id="regName" placeholder="Your full name"></div></div>
       <div class="field"><label>Email ID</label><div class="row"><input type="email" id="regEmail" placeholder="you@example.com"></div></div>
@@ -135,8 +140,6 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
       <div class="error-msg" id="regError"></div>
       <button class="btn-primary" id="regBtn" onclick="startRegistration()">Send Verification Code</button>
     </div>
-
-    <!-- OTP VERIFICATION -->
     <div id="formOTP" hidden>
       <div class="login-sub">Enter code sent to <strong id="otpEmail"></strong></div>
       <div class="otp-inputs">
@@ -149,21 +152,16 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
       </div>
       <div class="timer" id="timer"></div>
       <div class="error-msg" id="otpError"></div>
-      <button class="btn-primary" id="verifyBtn" onclick="verifyRegistrationOTP()">Verify & Create Account</button>
+      <button class="btn-primary" onclick="verifyRegistrationOTP()">Verify & Create Account</button>
       <div class="link-text" onclick="goBackToRegister()">← Back</div>
     </div>
-
-    <!-- FORGOT PASSWORD -->
     <div id="formForgot" hidden>
       <div class="login-sub">Enter your registered email</div>
       <div class="field"><label>Email ID</label><div class="row"><input type="email" id="forgotEmail" placeholder="you@example.com"></div></div>
-      <div class="error-msg" id="forgotError"></div>
-      <div class="success-msg" id="forgotSuccess"></div>
+      <div class="error-msg" id="forgotError"></div><div class="success-msg" id="forgotSuccess"></div>
       <button class="btn-primary" onclick="sendResetCode()">Send Reset Code</button>
-      <div class="link-text" onclick="showTab('login')">← Back to Login</div>
+      <div class="link-text" onclick="showTab('login')">← Back</div>
     </div>
-
-    <!-- RESET PASSWORD -->
     <div id="formReset" hidden>
       <div class="login-sub">Enter code and new password</div>
       <div id="resetUserid" style="text-align:center;font-weight:600;margin-bottom:10px;"></div>
@@ -171,18 +169,15 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
       <div class="field"><label>New Password</label><div class="row"><input type="password" id="resetPassword" placeholder="Min 6 characters"></div></div>
       <div class="error-msg" id="resetError"></div>
       <button class="btn-primary" onclick="resetPassword()">Reset Password</button>
-      <div class="link-text" onclick="showTab('login')">← Back to Login</div>
+      <div class="link-text" onclick="showTab('login')">← Back</div>
     </div>
-
-    <!-- SUCCESS -->
     <div id="formSuccess" hidden>
       <div style="text-align:center;padding:20px;">
-        <div style="font-size:50px;margin-bottom:15px;">✅</div>
+        <div style="font-size:50px;">✅</div>
         <h3 style="color:#059669;">Registration Successful!</h3>
-        <p style="margin:10px 0;font-size:14px;">Your User ID:</p>
+        <p>Your User ID:</p>
         <div style="font-size:24px;font-weight:700;color:var(--accent);padding:10px;background:var(--rule-bg);border-radius:10px;margin:10px 0;" id="newUserid"></div>
-        <p style="font-size:12px;color:var(--ink-soft);">Use this User ID and your password to login</p>
-        <button class="btn-primary" onclick="showTab('login')" style="margin-top:15px;">Go to Login</button>
+        <button class="btn-primary" onclick="showTab('login')">Go to Login</button>
       </div>
     </div>
   </div>
@@ -193,9 +188,9 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
   <header class="main-header">
     <div class="brand-mark">Engineers<span> Babu</span><span class="tag">· LEARNING</span></div>
     <div class="header-actions">
-      <span class="pill-btn" id="userPill">User</span>
-      <span class="pill-btn" onclick="logout()" style="cursor:pointer;">🚪 Logout</span>
-      <span class="pill-btn" onclick="toggleTheme()">🌙 / ☀️</span>
+      <span class="pill-btn" onclick="showProfile()" style="cursor:pointer;">👤 <span id="userPill">User</span></span>
+      <span class="pill-btn" onclick="logout()" style="cursor:pointer;">🚪</span>
+      <span class="pill-btn" onclick="toggleTheme()">🌙</span>
     </div>
   </header>
   <div class="gradient-bar"></div>
@@ -223,11 +218,20 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
   </div>
 
   <div class="view" id="viewPlayer" hidden>
-    <div class="view-title" id="playerTitle">Player</div><span class="view-hint">↓ click to open video in new tab</span>
+    <div class="view-title" id="playerTitle">Player</div><span class="view-hint">↓ click to open video</span>
     <div id="playerLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading...</div>
     <div class="player-grid">
       <div class="panel"><h3>🎬 Videos</h3><div id="videoList"></div></div>
       <div class="panel"><h3>📄 PDF</h3><div id="pdfList"></div><iframe id="pdfViewer" style="width:100%;height:420px;border:none;border-radius:10px;background:var(--rule-bg);margin-top:12px;"></iframe></div>
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" class="profile-modal" hidden>
+    <div class="profile-card">
+      <h2>👤 My Profile</h2>
+      <div id="profileContent"><div class="loading-spinner"><div class="spinner"></div> Loading...</div></div>
+      <button class="btn-close" onclick="closeProfile()">Close</button>
     </div>
   </div>
 </div>
@@ -236,37 +240,31 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 const API_PROXY="/api/proxy";
 let state={loggedIn:false,userid:null,username:null,batchId:null,topicId:null,batchName:null,topicName:null};
 let allBatches=[];
+let authToken="";
 let otpTimer=null,otpSeconds=300,regEmail="",regData={};
 
-// ═══════════ CHECK EXISTING SESSION ═══════════
+// ═══════════ SESSION CHECK ═══════════
 (function checkSession(){
-  const session = localStorage.getItem('eb_session');
-  if (session) {
-    try {
-      const data = JSON.parse(session);
-      const loginTime = new Date(data.loginTime);
-      const now = new Date();
-      const daysDiff = (now - loginTime) / (1000 * 60 * 60 * 24);
-      if (daysDiff < 7) {
-        state.userid = data.userid;
-        state.username = data.username;
-        state.loggedIn = true;
-        document.getElementById("loginScreen").hidden = true;
-        document.getElementById("mainScreen").hidden = false;
-        document.getElementById("userPill").textContent = data.username || data.userid;
-        loadMeta();
-        renderApps();
-        renderBreadcrumb();
-        return;
-      }
-    } catch (e) {}
-    localStorage.removeItem('eb_session');
+  const token=localStorage.getItem("eb_token");
+  const session=localStorage.getItem("eb_session");
+  if(token&&session){
+    try{
+      const data=JSON.parse(session);
+      authToken=token;
+      state.userid=data.userid;state.username=data.username;state.loggedIn=true;
+      document.getElementById("loginScreen").hidden=true;
+      document.getElementById("mainScreen").hidden=false;
+      document.getElementById("userPill").textContent=data.username||data.userid;
+      loadMeta();renderApps();renderBreadcrumb();
+    }catch(e){logout();}
   }
 })();
 
 async function apiGet(endpoint,params={}){
+  if(!authToken) return null;
+  params.token=authToken;
   const url=`${API_PROXY}?endpoint=${encodeURIComponent(endpoint)}&`+Object.entries(params).filter(([,v])=>v!==undefined&&v!==null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
-  try{const r=await fetch(url);return r.ok?await r.json():null;}catch(e){return null;}
+  try{const r=await fetch(url);if(r.status===401){logout();return null;}return r.ok?await r.json():null;}catch(e){return null;}
 }
 
 async function apiPost(endpoint,body){
@@ -279,153 +277,120 @@ function showTab(tab){
   document.getElementById("tabRegister").classList.toggle("active",tab==="register");
   document.getElementById("formLogin").hidden=tab!=="login";
   document.getElementById("formRegister").hidden=tab!=="register";
-  document.getElementById("formOTP").hidden=true;
-  document.getElementById("formForgot").hidden=true;
-  document.getElementById("formReset").hidden=true;
-  document.getElementById("formSuccess").hidden=true;
+  document.getElementById("formOTP").hidden=document.getElementById("formForgot").hidden=document.getElementById("formReset").hidden=document.getElementById("formSuccess").hidden=true;
   document.getElementById("loginSubtitle").textContent=tab==="login"?"Login to your account":"Create a new account";
   clearErrors();
 }
-
 function showForgotPassword(){
-  document.getElementById("formLogin").hidden=true;
-  document.getElementById("formForgot").hidden=false;
-  document.getElementById("formReset").hidden=true;
-  document.getElementById("loginSubtitle").textContent="Reset your password";
-  clearErrors();
+  document.getElementById("formLogin").hidden=document.getElementById("formReset").hidden=true;
+  document.getElementById("formForgot").hidden=false;clearErrors();
 }
-
-function goBackToRegister(){
-  document.getElementById("formOTP").hidden=true;
-  document.getElementById("formRegister").hidden=false;
-  clearInterval(otpTimer);
-}
-
-function clearErrors(){
-  ["loginError","regError","otpError","forgotError","resetError"].forEach(id=>{
-    document.getElementById(id).style.display="none";
-  });
-}
+function goBackToRegister(){document.getElementById("formOTP").hidden=true;document.getElementById("formRegister").hidden=false;clearInterval(otpTimer);}
+function clearErrors(){["loginError","regError","otpError","forgotError","resetError"].forEach(id=>document.getElementById(id).style.display="none");}
 
 // ═══════════ LOGIN ═══════════
 async function doLogin(){
   const userid=document.getElementById("loginUserid").value.trim();
   const password=document.getElementById("loginPassword").value;
-  const errEl=document.getElementById("loginError");
-  errEl.style.display="none";
+  const errEl=document.getElementById("loginError");errEl.style.display="none";
   if(!userid||!password){errEl.textContent="Enter User ID and password";errEl.style.display="block";return;}
   const data=await apiPost("/api/login",{userid,password});
   if(data.success){
-    state.userid=userid;state.username=data.name;state.loggedIn=true;
-    localStorage.setItem('eb_session', JSON.stringify({
-      userid:userid, username:data.name, email:data.email,
-      loginTime:new Date().toISOString()
-    }));
-    document.getElementById("loginScreen").hidden=true;
-    document.getElementById("mainScreen").hidden=false;
+    authToken=data.token;state.userid=userid;state.username=data.name;state.loggedIn=true;
+    localStorage.setItem("eb_token",authToken);
+    localStorage.setItem("eb_session",JSON.stringify({userid,username:data.name,email:data.email,loginTime:new Date().toISOString()}));
+    document.getElementById("loginScreen").hidden=true;document.getElementById("mainScreen").hidden=false;
     document.getElementById("userPill").textContent=data.name||userid;
     loadMeta();renderApps();renderBreadcrumb();
-  }else{
-    errEl.textContent=data.error;errEl.style.display="block";
-  }
+  }else{errEl.textContent=data.error;errEl.style.display="block";}
 }
 
-// ═══════════ LOGOUT ═══════════
 function logout(){
-  localStorage.removeItem('eb_session');
-  state.loggedIn=false;state.userid=null;state.username=null;
-  state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;
-  document.getElementById("mainScreen").hidden=true;
-  document.getElementById("loginScreen").hidden=false;
-  document.getElementById("loginUserid").value='';
-  document.getElementById("loginPassword").value='';
-  showTab('login');
+  if(authToken) fetch(`/api/logout?token=${authToken}`);
+  authToken="";localStorage.removeItem("eb_token");localStorage.removeItem("eb_session");
+  state.loggedIn=false;state.userid=null;state.username=null;state.batchId=null;state.topicId=null;
+  document.getElementById("mainScreen").hidden=true;document.getElementById("loginScreen").hidden=false;
+  document.getElementById("loginUserid").value="";document.getElementById("loginPassword").value="";showTab("login");
 }
+
+// ═══════════ PROFILE ═══════════
+async function showProfile(){
+  document.getElementById("profileModal").hidden=false;
+  document.getElementById("profileContent").innerHTML='<div class="loading-spinner"><div class="spinner"></div> Loading...</div>';
+  const data=await apiGet("/api/profile");
+  if(data&&data.success){
+    const p=data.profile;
+    document.getElementById("profileContent").innerHTML=`
+      <div class="profile-field"><span class="label">User ID</span><span class="value">${esc(p.userid)}</span></div>
+      <div class="profile-field"><span class="label">Name</span><span class="value">${esc(p.name)}</span></div>
+      <div class="profile-field"><span class="label">Email</span><span class="value">${esc(p.email)}</span></div>
+      <div class="profile-field"><span class="label">Mobile</span><span class="value">${esc(p.mobile||'N/A')}</span></div>
+      <div class="profile-field"><span class="label">Member Since</span><span class="value">${p.created?new Date(p.created).toLocaleDateString():'N/A'}</span></div>
+      <div class="profile-field"><span class="label">Last Login</span><span class="value">${p.last_login?new Date(p.last_login).toLocaleString():'N/A'}</span></div>
+      <div class="profile-field"><span class="label">Total Logins</span><span class="value">${p.login_count}</span></div>
+      <div class="profile-field"><span class="label">Account Type</span><span class="value">${p.is_vip?'⭐ VIP':'Regular'}</span></div>
+    `;
+  }else{document.getElementById("profileContent").innerHTML='<p style="text-align:center;color:var(--accent-2);">Failed to load profile</p>';}
+}
+function closeProfile(){document.getElementById("profileModal").hidden=true;}
 
 // ═══════════ REGISTRATION ═══════════
 async function startRegistration(){
   const name=document.getElementById("regName").value.trim();
-  const email=document.getElementById("regEmail").value.trim();
+  const email=document.getElementById("regEmail").value.trim().toLowerCase();
   const mobile=document.getElementById("regMobile").value.trim();
   const password=document.getElementById("regPassword").value;
-  const errEl=document.getElementById("regError");
-  const btn=document.getElementById("regBtn");
-  errEl.style.display="none";
+  const errEl=document.getElementById("regError");const btn=document.getElementById("regBtn");errEl.style.display="none";
   if(!name){errEl.textContent="Enter your name";errEl.style.display="block";return;}
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent="Enter valid email";errEl.style.display="block";return;}
-  if(password.length<6){errEl.textContent="Password must be at least 6 characters";errEl.style.display="block";return;}
-  regData={name,email,mobile,password};regEmail=email;
-  btn.disabled=true;btn.textContent="Sending...";
-  const data=await apiPost("/api/register-otp",regData);
-  btn.disabled=false;btn.textContent="Send Verification Code";
+  if(!mobile||mobile.length<10){errEl.textContent="Enter valid mobile number";errEl.style.display="block";return;}
+  if(password.length<6){errEl.textContent="Password min 6 characters";errEl.style.display="block";return;}
+  regData={name,email,mobile,password};regEmail=email;btn.disabled=true;btn.textContent="Sending...";
+  const data=await apiPost("/api/register-otp",regData);btn.disabled=false;btn.textContent="Send Verification Code";
   if(data.success){
-    document.getElementById("formRegister").hidden=true;
-    document.getElementById("formOTP").hidden=false;
+    document.getElementById("formRegister").hidden=true;document.getElementById("formOTP").hidden=false;
     document.getElementById("otpEmail").textContent=email;
     for(let i=1;i<=6;i++) document.getElementById("o"+i).value="";
-    document.getElementById("o1").focus();
-    otpSeconds=300;startOTPTimer();
+    document.getElementById("o1").focus();otpSeconds=300;startOTPTimer();
   }else{errEl.textContent=data.error;errEl.style.display="block";}
 }
 
 async function verifyRegistrationOTP(){
   const code=[1,2,3,4,5,6].map(i=>document.getElementById("o"+i).value).join("");
-  const errEl=document.getElementById("otpError");
-  const btn=document.getElementById("verifyBtn");
-  errEl.style.display="none";
+  const errEl=document.getElementById("otpError");const btn=document.getElementById("verifyBtn");errEl.style.display="none";
   if(code.length!==6){errEl.textContent="Enter complete code";errEl.style.display="block";return;}
   if(otpSeconds<=0){errEl.textContent="Code expired";errEl.style.display="block";return;}
   btn.disabled=true;btn.textContent="Verifying...";
-  const data=await apiPost("/api/register-verify",{email:regEmail,code});
-  btn.disabled=false;btn.textContent="Verify & Create Account";
-  if(data.success){
-    clearInterval(otpTimer);
-    document.getElementById("formOTP").hidden=true;
-    document.getElementById("formSuccess").hidden=false;
-    document.getElementById("newUserid").textContent=data.userid;
-    document.getElementById("loginSubtitle").textContent="Registration Complete";
-  }else{errEl.textContent=data.error;errEl.style.display="block";}
+  const data=await apiPost("/api/register-verify",{email:regEmail,code});btn.disabled=false;btn.textContent="Verify & Create Account";
+  if(data.success){clearInterval(otpTimer);document.getElementById("formOTP").hidden=true;document.getElementById("formSuccess").hidden=false;document.getElementById("newUserid").textContent=data.userid;}
+  else{errEl.textContent=data.error;errEl.style.display="block";}
 }
 
 // ═══════════ FORGOT PASSWORD ═══════════
 async function sendResetCode(){
-  const email=document.getElementById("forgotEmail").value.trim();
-  const errEl=document.getElementById("forgotError");
-  const sucEl=document.getElementById("forgotSuccess");
-  errEl.style.display="none";sucEl.style.display="none";
+  const email=document.getElementById("forgotEmail").value.trim().toLowerCase();
+  const errEl=document.getElementById("forgotError");const sucEl=document.getElementById("forgotSuccess");errEl.style.display="none";sucEl.style.display="none";
   if(!email){errEl.textContent="Enter your email";errEl.style.display="block";return;}
   const data=await apiPost("/api/forgot-password",{email});
-  if(data.success){
-    sucEl.textContent="Code sent! Your User ID: "+data.userid;
-    sucEl.style.display="block";
-    document.getElementById("formForgot").hidden=true;
-    document.getElementById("formReset").hidden=false;
-    document.getElementById("resetUserid").textContent="User ID: "+data.userid;
-  }else{errEl.textContent=data.error;errEl.style.display="block";}
+  if(data.success){sucEl.textContent="Code sent! User ID: "+data.userid;sucEl.style.display="block";document.getElementById("formForgot").hidden=true;document.getElementById("formReset").hidden=false;document.getElementById("resetUserid").textContent="User ID: "+data.userid;}
+  else{errEl.textContent=data.error;errEl.style.display="block";}
 }
 
 async function resetPassword(){
-  const email=document.getElementById("forgotEmail").value.trim();
+  const email=document.getElementById("forgotEmail").value.trim().toLowerCase();
   const code=document.getElementById("resetCode").value.trim();
   const password=document.getElementById("resetPassword").value;
-  const errEl=document.getElementById("resetError");
-  errEl.style.display="none";
+  const errEl=document.getElementById("resetError");errEl.style.display="none";
   if(!code){errEl.textContent="Enter reset code";errEl.style.display="block";return;}
-  if(password.length<6){errEl.textContent="Password must be at least 6 characters";errEl.style.display="block";return;}
+  if(password.length<6){errEl.textContent="Password min 6 characters";errEl.style.display="block";return;}
   const data=await apiPost("/api/reset-password",{email,code,password});
   if(data.success){alert("Password changed!");showTab("login");}
   else{errEl.textContent=data.error;errEl.style.display="block";}
 }
 
-// ═══════════ OTP TIMER ═══════════
-function startOTPTimer(){
-  clearInterval(otpTimer);updateOTPTimer();
-  otpTimer=setInterval(()=>{otpSeconds--;updateOTPTimer();if(otpSeconds<=0){clearInterval(otpTimer);document.getElementById("timer").textContent="Code expired";}},1000);
-}
-function updateOTPTimer(){
-  const m=Math.floor(otpSeconds/60),s=otpSeconds%60;
-  document.getElementById("timer").textContent=`Expires in ${m}:${s.toString().padStart(2,'0')}`;
-}
+// ═══════════ OTP ═══════════
+function startOTPTimer(){clearInterval(otpTimer);updateOTPTimer();otpTimer=setInterval(()=>{otpSeconds--;updateOTPTimer();if(otpSeconds<=0){clearInterval(otpTimer);document.getElementById("timer").textContent="Code expired";}},1000);}
+function updateOTPTimer(){const m=Math.floor(otpSeconds/60),s=otpSeconds%60;document.getElementById("timer").textContent=`Expires in ${m}:${s.toString().padStart(2,'0')}`;}
 function otpNext(i){if(i.value.length===1){const n=i.nextElementSibling;if(n)n.focus();}}
 function otpBack(e,i,prev){if(e.key==="Backspace"&&!i.value&&prev)document.getElementById(prev).focus();}
 
@@ -434,9 +399,7 @@ function toggleTheme(){document.body.classList.toggle("dark");}
 async function loadMeta(){const d=await apiGet("courses/active");document.getElementById("swMeta").textContent=(d&&d.data)?d.data.length+" batches":"Tap to load";}
 function showView(n){["viewApps","viewBatches","viewTopics","viewPlayer"].forEach(v=>document.getElementById(v).hidden=v!==n);}
 function renderBreadcrumb(){
-  let p=[{l:"My Apps",f:goApps}];
-  if(state.batchId) p.push({l:state.batchName||"Batch",f:()=>goBatches()});
-  if(state.topicId) p.push({l:state.topicName||"Topic",f:null});
+  let p=[{l:"My Apps",f:goApps}];if(state.batchId) p.push({l:state.batchName||"Batch",f:()=>goBatches()});if(state.topicId) p.push({l:state.topicName||"Topic",f:null});
   document.getElementById("breadcrumb").innerHTML=p.map((x,i)=>(i>0?'<span class="arrow">↓</span>':'')+`<span class="crumb ${i===p.length-1?'current':''}">${x.l}</span>`).join("");
   document.querySelectorAll("#breadcrumb .crumb").forEach((el,i)=>{if(p[i].f)el.onclick=p[i].f;});
 }
@@ -476,10 +439,8 @@ async function goPlayer(batchId,topicId,topicName){
   if(!d||!d.data||!d.data.classes||!d.data.classes.length){document.getElementById("videoList").innerHTML='<div class="empty-hint">No classes</div>';document.getElementById("pdfList").innerHTML='<div class="empty-hint">No PDFs</div>';return;}
   const videos=[],pdfs=[];
   d.data.classes.forEach(c=>{const t=c.title||"Untitled";if(c.class_link) videos.push({title:t,src:c.class_link});(c.classPdf||[]).forEach(pdf=>{if(pdf.url) pdfs.push({name:pdf.name||"PDF",src:pdf.url});});});
-  document.getElementById("videoList").innerHTML=videos.length?videos.map(v=>`<div class="video-card"><p style="font-weight:600;margin-bottom:10px;">🎬 ${esc(v.title)}</p><a href="${v.src}" target="_blank" rel="noopener noreferrer" class="video-btn">▶️ Open Video in New Tab</a></div>`).join(""):'<div class="empty-hint">No videos</div>';
-  const pl=document.getElementById("pdfList");
-  if(!pdfs.length){pl.innerHTML='<div class="empty-hint">No PDFs</div>';}
-  else{pl.dataset.pdfs=JSON.stringify(pdfs);pl.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectPdf(${i},this)">📄 ${esc(p.name)}</div>`).join("");loadPdf(pdfs[0]);}
+  document.getElementById("videoList").innerHTML=videos.length?videos.map(v=>`<div class="video-card"><p style="font-weight:600;">🎬 ${esc(v.title)}</p><a href="${v.src}" target="_blank" rel="noopener noreferrer" class="video-btn">▶️ Open Video</a></div>`).join(""):'<div class="empty-hint">No videos</div>';
+  const pl=document.getElementById("pdfList");if(!pdfs.length){pl.innerHTML='<div class="empty-hint">No PDFs</div>';}else{pl.dataset.pdfs=JSON.stringify(pdfs);pl.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectPdf(${i},this)">📄 ${esc(p.name)}</div>`).join("");loadPdf(pdfs[0]);}
 }
 
 function selectPdf(i,el){document.querySelectorAll("#pdfList .list-item").forEach(x=>x.classList.remove("playing"));el.classList.add("playing");loadPdf(JSON.parse(document.getElementById("pdfList").dataset.pdfs)[i]);}
