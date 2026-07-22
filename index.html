@@ -23,7 +23,7 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);transition:background .25s,color .25s;min-height:100vh;}
 h1,h2,h3{font-family:'Space Grotesk',sans-serif;}
-button,input,select{font-family:inherit;}
+button,input{font-family:inherit;}
 
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
 #loginScreen::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(rgba(41,85,201,0.08) 0 1px,transparent 1px 40px);opacity:.6;pointer-events:none;}
@@ -112,50 +112,31 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
     <div class="brand">Engineers<span> Babu</span></div>
     <div class="login-sub" id="loginSubtitle">Login to your account</div>
 
-    <!-- Tabs -->
     <div class="tabs">
       <button id="tabLogin" class="active" onclick="showTab('login')">Login</button>
       <button id="tabRegister" onclick="showTab('register')">Register</button>
     </div>
 
-    <!-- ═══ LOGIN FORM ═══ -->
+    <!-- LOGIN FORM -->
     <div id="formLogin">
-      <div class="field">
-        <label>User ID</label>
-        <div class="row"><input type="text" id="loginUserid" placeholder="EB1234" autocomplete="username"></div>
-      </div>
-      <div class="field">
-        <label>Password</label>
-        <div class="row"><input type="password" id="loginPassword" placeholder="••••••••"></div>
-      </div>
+      <div class="field"><label>User ID</label><div class="row"><input type="text" id="loginUserid" placeholder="EB1234" autocomplete="username"></div></div>
+      <div class="field"><label>Password</label><div class="row"><input type="password" id="loginPassword" placeholder="••••••••"></div></div>
       <div class="error-msg" id="loginError"></div>
       <button class="btn-primary" onclick="doLogin()">Sign In</button>
       <div class="link-text" onclick="showForgotPassword()">Forgot Password?</div>
     </div>
 
-    <!-- ═══ REGISTER FORM ═══ -->
+    <!-- REGISTER FORM -->
     <div id="formRegister" hidden>
-      <div class="field">
-        <label>Full Name</label>
-        <div class="row"><input type="text" id="regName" placeholder="Your full name"></div>
-      </div>
-      <div class="field">
-        <label>Email ID</label>
-        <div class="row"><input type="email" id="regEmail" placeholder="you@example.com"></div>
-      </div>
-      <div class="field">
-        <label>Mobile Number</label>
-        <div class="row"><span class="prefix">+91</span><input type="tel" id="regMobile" placeholder="9876543210" maxlength="10"></div>
-      </div>
-      <div class="field">
-        <label>Create Password</label>
-        <div class="row"><input type="password" id="regPassword" placeholder="Min 6 characters"></div>
-      </div>
+      <div class="field"><label>Full Name</label><div class="row"><input type="text" id="regName" placeholder="Your full name"></div></div>
+      <div class="field"><label>Email ID</label><div class="row"><input type="email" id="regEmail" placeholder="you@example.com"></div></div>
+      <div class="field"><label>Mobile Number</label><div class="row"><span class="prefix">+91</span><input type="tel" id="regMobile" placeholder="9876543210" maxlength="10"></div></div>
+      <div class="field"><label>Create Password</label><div class="row"><input type="password" id="regPassword" placeholder="Min 6 characters"></div></div>
       <div class="error-msg" id="regError"></div>
       <button class="btn-primary" id="regBtn" onclick="startRegistration()">Send Verification Code</button>
     </div>
 
-    <!-- ═══ OTP VERIFICATION ═══ -->
+    <!-- OTP VERIFICATION -->
     <div id="formOTP" hidden>
       <div class="login-sub">Enter code sent to <strong id="otpEmail"></strong></div>
       <div class="otp-inputs">
@@ -172,37 +153,28 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
       <div class="link-text" onclick="goBackToRegister()">← Back</div>
     </div>
 
-    <!-- ═══ FORGOT PASSWORD ═══ -->
+    <!-- FORGOT PASSWORD -->
     <div id="formForgot" hidden>
       <div class="login-sub">Enter your registered email</div>
-      <div class="field">
-        <label>Email ID</label>
-        <div class="row"><input type="email" id="forgotEmail" placeholder="you@example.com"></div>
-      </div>
+      <div class="field"><label>Email ID</label><div class="row"><input type="email" id="forgotEmail" placeholder="you@example.com"></div></div>
       <div class="error-msg" id="forgotError"></div>
       <div class="success-msg" id="forgotSuccess"></div>
       <button class="btn-primary" onclick="sendResetCode()">Send Reset Code</button>
       <div class="link-text" onclick="showTab('login')">← Back to Login</div>
     </div>
 
-    <!-- ═══ RESET PASSWORD ═══ -->
+    <!-- RESET PASSWORD -->
     <div id="formReset" hidden>
       <div class="login-sub">Enter code and new password</div>
       <div id="resetUserid" style="text-align:center;font-weight:600;margin-bottom:10px;"></div>
-      <div class="field">
-        <label>Reset Code</label>
-        <div class="row"><input type="text" id="resetCode" placeholder="6-digit code"></div>
-      </div>
-      <div class="field">
-        <label>New Password</label>
-        <div class="row"><input type="password" id="resetPassword" placeholder="Min 6 characters"></div>
-      </div>
+      <div class="field"><label>Reset Code</label><div class="row"><input type="text" id="resetCode" placeholder="6-digit code"></div></div>
+      <div class="field"><label>New Password</label><div class="row"><input type="password" id="resetPassword" placeholder="Min 6 characters"></div></div>
       <div class="error-msg" id="resetError"></div>
       <button class="btn-primary" onclick="resetPassword()">Reset Password</button>
       <div class="link-text" onclick="showTab('login')">← Back to Login</div>
     </div>
 
-    <!-- ═══ SUCCESS (after registration) ═══ -->
+    <!-- SUCCESS -->
     <div id="formSuccess" hidden>
       <div style="text-align:center;padding:20px;">
         <div style="font-size:50px;margin-bottom:15px;">✅</div>
@@ -220,7 +192,11 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 <div id="mainScreen" hidden>
   <header class="main-header">
     <div class="brand-mark">Engineers<span> Babu</span><span class="tag">· LEARNING</span></div>
-    <div class="header-actions"><span class="pill-btn" id="userPill">User</span><span class="pill-btn" onclick="toggleTheme()">🌙 / ☀️</span></div>
+    <div class="header-actions">
+      <span class="pill-btn" id="userPill">User</span>
+      <span class="pill-btn" onclick="logout()" style="cursor:pointer;">🚪 Logout</span>
+      <span class="pill-btn" onclick="toggleTheme()">🌙 / ☀️</span>
+    </div>
   </header>
   <div class="gradient-bar"></div>
   <div class="search-wrap"><input type="text" id="searchBox" placeholder="Search batches..." onkeyup="handleSearch(this.value)"></div>
@@ -261,6 +237,32 @@ const API_PROXY="/api/proxy";
 let state={loggedIn:false,userid:null,username:null,batchId:null,topicId:null,batchName:null,topicName:null};
 let allBatches=[];
 let otpTimer=null,otpSeconds=300,regEmail="",regData={};
+
+// ═══════════ CHECK EXISTING SESSION ═══════════
+(function checkSession(){
+  const session = localStorage.getItem('eb_session');
+  if (session) {
+    try {
+      const data = JSON.parse(session);
+      const loginTime = new Date(data.loginTime);
+      const now = new Date();
+      const daysDiff = (now - loginTime) / (1000 * 60 * 60 * 24);
+      if (daysDiff < 7) {
+        state.userid = data.userid;
+        state.username = data.username;
+        state.loggedIn = true;
+        document.getElementById("loginScreen").hidden = true;
+        document.getElementById("mainScreen").hidden = false;
+        document.getElementById("userPill").textContent = data.username || data.userid;
+        loadMeta();
+        renderApps();
+        renderBreadcrumb();
+        return;
+      }
+    } catch (e) {}
+    localStorage.removeItem('eb_session');
+  }
+})();
 
 async function apiGet(endpoint,params={}){
   const url=`${API_PROXY}?endpoint=${encodeURIComponent(endpoint)}&`+Object.entries(params).filter(([,v])=>v!==undefined&&v!==null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
@@ -311,12 +313,14 @@ async function doLogin(){
   const password=document.getElementById("loginPassword").value;
   const errEl=document.getElementById("loginError");
   errEl.style.display="none";
-
   if(!userid||!password){errEl.textContent="Enter User ID and password";errEl.style.display="block";return;}
-
   const data=await apiPost("/api/login",{userid,password});
   if(data.success){
     state.userid=userid;state.username=data.name;state.loggedIn=true;
+    localStorage.setItem('eb_session', JSON.stringify({
+      userid:userid, username:data.name, email:data.email,
+      loginTime:new Date().toISOString()
+    }));
     document.getElementById("loginScreen").hidden=true;
     document.getElementById("mainScreen").hidden=false;
     document.getElementById("userPill").textContent=data.name||userid;
@@ -324,6 +328,18 @@ async function doLogin(){
   }else{
     errEl.textContent=data.error;errEl.style.display="block";
   }
+}
+
+// ═══════════ LOGOUT ═══════════
+function logout(){
+  localStorage.removeItem('eb_session');
+  state.loggedIn=false;state.userid=null;state.username=null;
+  state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;
+  document.getElementById("mainScreen").hidden=true;
+  document.getElementById("loginScreen").hidden=false;
+  document.getElementById("loginUserid").value='';
+  document.getElementById("loginPassword").value='';
+  showTab('login');
 }
 
 // ═══════════ REGISTRATION ═══════════
@@ -335,18 +351,13 @@ async function startRegistration(){
   const errEl=document.getElementById("regError");
   const btn=document.getElementById("regBtn");
   errEl.style.display="none";
-
   if(!name){errEl.textContent="Enter your name";errEl.style.display="block";return;}
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent="Enter valid email";errEl.style.display="block";return;}
   if(password.length<6){errEl.textContent="Password must be at least 6 characters";errEl.style.display="block";return;}
-
-  regData={name,email,mobile,password};
-  regEmail=email;
+  regData={name,email,mobile,password};regEmail=email;
   btn.disabled=true;btn.textContent="Sending...";
-
   const data=await apiPost("/api/register-otp",regData);
   btn.disabled=false;btn.textContent="Send Verification Code";
-
   if(data.success){
     document.getElementById("formRegister").hidden=true;
     document.getElementById("formOTP").hidden=false;
@@ -354,9 +365,7 @@ async function startRegistration(){
     for(let i=1;i<=6;i++) document.getElementById("o"+i).value="";
     document.getElementById("o1").focus();
     otpSeconds=300;startOTPTimer();
-  }else{
-    errEl.textContent=data.error;errEl.style.display="block";
-  }
+  }else{errEl.textContent=data.error;errEl.style.display="block";}
 }
 
 async function verifyRegistrationOTP(){
@@ -366,20 +375,16 @@ async function verifyRegistrationOTP(){
   errEl.style.display="none";
   if(code.length!==6){errEl.textContent="Enter complete code";errEl.style.display="block";return;}
   if(otpSeconds<=0){errEl.textContent="Code expired";errEl.style.display="block";return;}
-
   btn.disabled=true;btn.textContent="Verifying...";
   const data=await apiPost("/api/register-verify",{email:regEmail,code});
   btn.disabled=false;btn.textContent="Verify & Create Account";
-
   if(data.success){
     clearInterval(otpTimer);
     document.getElementById("formOTP").hidden=true;
     document.getElementById("formSuccess").hidden=false;
     document.getElementById("newUserid").textContent=data.userid;
     document.getElementById("loginSubtitle").textContent="Registration Complete";
-  }else{
-    errEl.textContent=data.error;errEl.style.display="block";
-  }
+  }else{errEl.textContent=data.error;errEl.style.display="block";}
 }
 
 // ═══════════ FORGOT PASSWORD ═══════════
@@ -388,7 +393,6 @@ async function sendResetCode(){
   const errEl=document.getElementById("forgotError");
   const sucEl=document.getElementById("forgotSuccess");
   errEl.style.display="none";sucEl.style.display="none";
-
   if(!email){errEl.textContent="Enter your email";errEl.style.display="block";return;}
   const data=await apiPost("/api/forgot-password",{email});
   if(data.success){
@@ -397,9 +401,7 @@ async function sendResetCode(){
     document.getElementById("formForgot").hidden=true;
     document.getElementById("formReset").hidden=false;
     document.getElementById("resetUserid").textContent="User ID: "+data.userid;
-  }else{
-    errEl.textContent=data.error;errEl.style.display="block";
-  }
+  }else{errEl.textContent=data.error;errEl.style.display="block";}
 }
 
 async function resetPassword(){
@@ -408,23 +410,17 @@ async function resetPassword(){
   const password=document.getElementById("resetPassword").value;
   const errEl=document.getElementById("resetError");
   errEl.style.display="none";
-
   if(!code){errEl.textContent="Enter reset code";errEl.style.display="block";return;}
   if(password.length<6){errEl.textContent="Password must be at least 6 characters";errEl.style.display="block";return;}
-
   const data=await apiPost("/api/reset-password",{email,code,password});
-  if(data.success){
-    alert("Password changed successfully!");
-    showTab("login");
-  }else{
-    errEl.textContent=data.error;errEl.style.display="block";
-  }
+  if(data.success){alert("Password changed!");showTab("login");}
+  else{errEl.textContent=data.error;errEl.style.display="block";}
 }
 
 // ═══════════ OTP TIMER ═══════════
 function startOTPTimer(){
   clearInterval(otpTimer);updateOTPTimer();
-  otpTimer=setInterval(()=>{otpSeconds--;updateOTPTimer();if(otpSeconds<=0){clearInterval(otpTimer);document.getElementById("timer").textContent="Code expired. Request new.";}},1000);
+  otpTimer=setInterval(()=>{otpSeconds--;updateOTPTimer();if(otpSeconds<=0){clearInterval(otpTimer);document.getElementById("timer").textContent="Code expired";}},1000);
 }
 function updateOTPTimer(){
   const m=Math.floor(otpSeconds/60),s=otpSeconds%60;
