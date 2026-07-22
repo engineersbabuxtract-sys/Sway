@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
-<!-- HLS.js -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
@@ -102,76 +101,56 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 .list-item:hover{border-color:var(--accent);}
 .list-item.playing{background:var(--accent);color:#fff;}
 .empty-hint{color:var(--ink-soft);font-size:13px;font-style:italic;}
-.debug-panel{font-size:11px;margin-top:8px;padding:8px;background:var(--rule-bg);border-radius:6px;word-break:break-all;display:none;max-height:200px;overflow-y:auto;}
+.debug-panel{font-size:11px;margin-top:8px;padding:8px;background:var(--rule-bg);border-radius:6px;word-break:break-all;display:none;max-height:200px;overflow-y:auto;font-family:'JetBrains Mono',monospace;}
 .btn-open{display:inline-block;margin-top:8px;padding:8px 16px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;}
-.btn-small{padding:4px 10px;font-size:11px;background:var(--accent-2);color:#fff;border:none;border-radius:6px;cursor:pointer;margin-top:6px;}
 [hidden]{display:none!important;}
 </style>
 </head>
 
 <body>
 
-<!-- ============ LOGIN ============ -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="brand">Engineers<span> Babu</span></div>
-    <div class="login-sub">Sign in or skip to browse all batches.</div>
+    <div class="login-sub">Sign in or skip to browse.</div>
     <div class="mode-switch">
       <button id="modeMobile" class="active" onclick="setLoginMode('mobile')">Mobile</button>
       <button id="modeEmail" onclick="setLoginMode('email')">Email</button>
     </div>
     <form onsubmit="return handleLogin(event)">
-      <div class="field" id="mobileField">
-        <label>Mobile</label>
-        <div class="row"><span class="prefix">+91</span><input type="tel" id="mobileInput" placeholder="98765 43210" maxlength="10"></div>
-      </div>
-      <div class="field" id="emailField" hidden>
-        <label>Email</label>
-        <div class="row"><input type="email" id="emailInput" placeholder="you@example.com"></div>
-      </div>
+      <div class="field" id="mobileField"><label>Mobile</label><div class="row"><span class="prefix">+91</span><input type="tel" id="mobileInput" placeholder="98765 43210" maxlength="10"></div></div>
+      <div class="field" id="emailField" hidden><label>Email</label><div class="row"><input type="email" id="emailInput" placeholder="you@example.com"></div></div>
       <div class="field"><label>Password</label><div class="row"><input type="password" id="passInput" placeholder="••••••••"></div></div>
       <div class="error-msg" id="loginError"></div>
       <button class="btn-primary" type="submit">Continue</button>
     </form>
     <span class="skip-link" onclick="enterApp(false)">Skip → Guest</span>
-    <div class="login-note">No login required to browse.</div>
+    <div class="login-note">No login required.</div>
   </div>
 </div>
 
-<!-- ============ MAIN ============ -->
 <div id="mainScreen" hidden>
   <header class="main-header">
     <div class="brand-mark">Engineers<span> Babu</span><span class="tag">· LEARNING</span></div>
-    <div class="header-actions">
-      <span class="pill-btn" id="userPill">Guest</span>
-      <span class="pill-btn" onclick="toggleTheme()">🌙 / ☀️</span>
-    </div>
+    <div class="header-actions"><span class="pill-btn" id="userPill">Guest</span><span class="pill-btn" onclick="toggleTheme()">🌙 / ☀️</span></div>
   </header>
   <div class="gradient-bar"></div>
-
   <div class="search-wrap"><input type="text" id="searchBox" placeholder="Search batches..." onkeyup="handleSearch(this.value)"></div>
   <div class="breadcrumb" id="breadcrumb"></div>
 
-  <!-- LEVEL 1: Apps -->
   <div class="view" id="viewApps">
-    <div class="view-title">My Apps</div>
-    <span class="view-hint">↓ tap to open</span>
+    <div class="view-title">My Apps</div><span class="view-hint">↓ tap to open</span>
     <div class="card-grid" id="appsGrid">
-      <div class="nav-card" onclick="goBatches()">
-        <span class="icon">🎓</span><h3>Selection Way</h3><p>All batches</p><div class="meta" id="swMeta">Loading...</div>
-      </div>
+      <div class="nav-card" onclick="goBatches()"><span class="icon">🎓</span><h3>Selection Way</h3><p>All batches</p><div class="meta" id="swMeta">Loading...</div></div>
     </div>
   </div>
 
-  <!-- LEVEL 2: Batches -->
   <div class="view" id="viewBatches" hidden>
-    <div class="view-title" id="batchesTitle">Batches</div>
-    <span class="view-hint">↓ click any batch</span>
+    <div class="view-title" id="batchesTitle">Batches</div><span class="view-hint">↓ click any batch</span>
     <div id="batchesLoading" class="loading-spinner"><div class="spinner"></div> Loading...</div>
     <div class="card-grid" id="batchesGrid"></div>
   </div>
 
-  <!-- LEVEL 3: Topics -->
   <div class="view" id="viewTopics" hidden>
     <div class="view-title" id="topicsTitle">Topics</div>
     <div class="faculty-note" id="facultyNote"><span class="pin"></span><span id="facultyName"></span></div>
@@ -179,17 +158,13 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
     <div class="topic-list" id="topicsList"></div>
   </div>
 
-  <!-- LEVEL 4: Player -->
   <div class="view" id="viewPlayer" hidden>
-    <div class="view-title" id="playerTitle">Player</div>
-    <span class="view-hint">↓ click to play · all video goes through proxy</span>
+    <div class="view-title" id="playerTitle">Player</div><span class="view-hint">↓ all video routed through proxy</span>
     <div id="playerLoading" class="loading-spinner" hidden><div class="spinner"></div> Loading...</div>
     <div class="player-grid">
       <div class="panel">
-        <h3>🎬 Video (via Proxy)</h3>
-        <div id="videoPlayer">
-          <video id="hlsVideo" controls autoplay playsinline style="width:100%;border-radius:10px;background:#000;min-height:240px;"></video>
-        </div>
+        <h3>🎬 Video (Proxy)</h3>
+        <div id="videoPlayer"><video id="hlsVideo" controls autoplay playsinline style="width:100%;border-radius:10px;background:#000;min-height:240px;"></video></div>
         <div class="debug-panel" id="videoDebug"></div>
         <div id="videoList"></div>
       </div>
@@ -203,21 +178,17 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 </div>
 
 <script>
-/* ================= CONFIG ================= */
 const USER_ID = "";
 let state = { loggedIn:false, batchId:null, topicId:null, batchName:null, topicName:null };
 let hlsInstance = null;
 
-/* ================= API (via proxy) ================= */
 async function apiGet(endpoint, params = {}){
   params.userId = USER_ID;
-  const url = `/api/proxy?endpoint=${encodeURIComponent(endpoint)}&` + 
-    Object.entries(params).filter(([,v])=>v!==undefined&&v!==null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
+  const url = `/api/proxy?endpoint=${encodeURIComponent(endpoint)}&` + Object.entries(params).filter(([,v])=>v!==undefined&&v!==null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
   try { const r = await fetch(url); return r.ok ? await r.json() : null; }
   catch(e){ console.error("API:",e); return null; }
 }
 
-/* ================= LOGIN ================= */
 function setLoginMode(m){
   state.mode=m;
   document.getElementById("modeMobile").classList.toggle("active",m==="mobile");
@@ -252,10 +223,7 @@ async function loadMeta(){
 }
 function toggleTheme(){document.body.classList.toggle("dark");}
 
-/* ================= NAVIGATION ================= */
-function showView(n){
-  ["viewApps","viewBatches","viewTopics","viewPlayer"].forEach(v=>document.getElementById(v).hidden=v!==n);
-}
+function showView(n){["viewApps","viewBatches","viewTopics","viewPlayer"].forEach(v=>document.getElementById(v).hidden=v!==n);}
 function renderBreadcrumb(){
   let p=[{l:"My Apps",f:goApps}];
   if(state.batchId) p.push({l:state.batchName||"Batch",f:()=>goBatches()});
@@ -265,119 +233,65 @@ function renderBreadcrumb(){
   bc.querySelectorAll(".crumb").forEach((el,i)=>{if(p[i].f)el.onclick=p[i].f;});
 }
 function renderApps(){showView("viewApps");renderBreadcrumb();}
-function goApps(){
-  state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;
-  destroyPlayer();renderApps();
-}
-function destroyPlayer(){
-  if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}
-  const v=document.getElementById("hlsVideo");v.pause();v.removeAttribute("src");v.load();
-}
+function goApps(){state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;destroyPlayer();renderApps();}
+function destroyPlayer(){if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}const v=document.getElementById("hlsVideo");v.pause();v.removeAttribute("src");v.load();}
 
-/* ================= BATCHES ================= */
 async function goBatches(){
-  state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;
-  destroyPlayer();
-  showView("viewBatches");
-  document.getElementById("batchesTitle").textContent="Selection Way — All Batches";
-  document.getElementById("batchesGrid").innerHTML="";
-  document.getElementById("batchesLoading").hidden=false;
-  renderBreadcrumb();
-
-  const d=await apiGet("courses/active");
-  document.getElementById("batchesLoading").hidden=true;
+  state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;destroyPlayer();
+  showView("viewBatches");document.getElementById("batchesTitle").textContent="Selection Way — All Batches";
+  document.getElementById("batchesGrid").innerHTML="";document.getElementById("batchesLoading").hidden=false;renderBreadcrumb();
+  const d=await apiGet("courses/active");document.getElementById("batchesLoading").hidden=true;
   if(!d||!d.data||!d.data.length){document.getElementById("batchesGrid").innerHTML='<div class="empty-hint">No batches</div>';return;}
-
   document.getElementById("batchesGrid").innerHTML=d.data.map(b=>{
     const t=esc(b.title||'Untitled'),f=esc((b.facultyDetails||{}).name||"Unknown");
-    return `<div class="nav-card" onclick="goTopics('${b.id}','${t}')"><span class="icon">📚</span><h3>${t}</h3><p>${f}</p>
-      <div class="meta">${b.isLive?'<span class="badge badge-live">🔴 LIVE</span>':'<span class="badge badge-vod">📺 VOD</span>'} ${b.isFree?'<span class="badge badge-free">🆓</span>':'<span class="badge badge-paid">💎</span>'}</div></div>`;
+    return `<div class="nav-card" onclick="goTopics('${b.id}','${t}')"><span class="icon">📚</span><h3>${t}</h3><p>${f}</p><div class="meta">${b.isLive?'<span class="badge badge-live">🔴 LIVE</span>':'<span class="badge badge-vod">📺 VOD</span>'} ${b.isFree?'<span class="badge badge-free">🆓</span>':'<span class="badge badge-paid">💎</span>'}</div></div>`;
   }).join("");
 }
 
-/* ================= TOPICS ================= */
 async function goTopics(batchId,batchName){
-  state.batchId=batchId;state.topicId=null;state.batchName=batchName;state.topicName=null;
-  destroyPlayer();
-  showView("viewTopics");
-  document.getElementById("topicsTitle").textContent=batchName;
-  document.getElementById("topicsList").innerHTML="";
-  document.getElementById("topicsLoading").hidden=false;
-  document.getElementById("facultyNote").hidden=true;
-  renderBreadcrumb();
-
-  const d=await apiGet("topic-and-section",{courseId:batchId});
-  document.getElementById("topicsLoading").hidden=true;
+  state.batchId=batchId;state.topicId=null;state.batchName=batchName;state.topicName=null;destroyPlayer();
+  showView("viewTopics");document.getElementById("topicsTitle").textContent=batchName;
+  document.getElementById("topicsList").innerHTML="";document.getElementById("topicsLoading").hidden=false;
+  document.getElementById("facultyNote").hidden=true;renderBreadcrumb();
+  const d=await apiGet("topic-and-section",{courseId:batchId});document.getElementById("topicsLoading").hidden=true;
   if(!d||!d.data||!d.data.topics||!d.data.topics.length){document.getElementById("topicsList").innerHTML='<div class="empty-hint">No topics</div>';return;}
-
-  if(d.data.facultyDetails&&d.data.facultyDetails.name){
-    document.getElementById("facultyNote").hidden=false;
-    document.getElementById("facultyName").textContent=d.data.facultyDetails.name;
-  }
+  if(d.data.facultyDetails&&d.data.facultyDetails.name){document.getElementById("facultyNote").hidden=false;document.getElementById("facultyName").textContent=d.data.facultyDetails.name;}
   document.getElementById("topicsList").innerHTML=d.data.topics.map(t=>
-    `<div class="topic-row" onclick="goPlayer('${batchId}','${t.topicId}','${esc(t.topicName||'Untitled')}')">
-      <div><div class="name">${esc(t.topicName||'Untitled')}</div><div class="sub">${t.classCount||0} classes</div></div><span class="go">→</span></div>`
+    `<div class="topic-row" onclick="goPlayer('${batchId}','${t.topicId}','${esc(t.topicName||'Untitled')}')"><div><div class="name">${esc(t.topicName||'Untitled')}</div><div class="sub">${t.classCount||0} classes</div></div><span class="go">→</span></div>`
   ).join("");
 }
 
-/* ================= PLAYER ================= */
 async function goPlayer(batchId,topicId,topicName){
-  state.topicId=topicId;state.topicName=topicName;
-  destroyPlayer();
-  showView("viewPlayer");
-  document.getElementById("playerTitle").textContent=topicName;
-  document.getElementById("videoList").innerHTML="";
-  document.getElementById("pdfList").innerHTML="";
-  document.getElementById("pdfViewer").src="";
-  document.getElementById("playerLoading").hidden=false;
-  document.getElementById("videoDebug").style.display="none";
-  renderBreadcrumb();
+  state.topicId=topicId;state.topicName=topicName;destroyPlayer();
+  showView("viewPlayer");document.getElementById("playerTitle").textContent=topicName;
+  document.getElementById("videoList").innerHTML="";document.getElementById("pdfList").innerHTML="";
+  document.getElementById("pdfViewer").src="";document.getElementById("playerLoading").hidden=false;
+  document.getElementById("videoDebug").style.display="none";renderBreadcrumb();
 
-  const d=await apiGet(`topics/${topicId}/classes`,{courseId:batchId});
-  document.getElementById("playerLoading").hidden=true;
-  if(!d||!d.data||!d.data.classes||!d.data.classes.length){
-    document.getElementById("videoList").innerHTML='<div class="empty-hint">No classes</div>';
-    document.getElementById("pdfList").innerHTML='<div class="empty-hint">No PDFs</div>';
-    return;
-  }
+  const d=await apiGet(`topics/${topicId}/classes`,{courseId:batchId});document.getElementById("playerLoading").hidden=true;
+  if(!d||!d.data||!d.data.classes||!d.data.classes.length){document.getElementById("videoList").innerHTML='<div class="empty-hint">No classes</div>';document.getElementById("pdfList").innerHTML='<div class="empty-hint">No PDFs</div>';return;}
 
   const videos=[],pdfs=[];
   d.data.classes.forEach(c=>{
     const t=c.title||"Untitled";
-    // HLS/m3u8 link
     if(c.class_link) videos.push({title:t,src:c.class_link,type:"hls"});
-    // MP4 recordings (fallback)
-    if(c.mp4Recordings&&c.mp4Recordings.length){
-      c.mp4Recordings.forEach(mp4=>{
-        if(mp4.url) videos.push({title:`${t} [${mp4.quality||'MP4'}]`,src:mp4.url,type:"mp4"});
-      });
-    }
-    // PDFs
+    if(c.mp4Recordings&&c.mp4Recordings.length){c.mp4Recordings.forEach(mp4=>{if(mp4.url) videos.push({title:`${t} [${mp4.quality||'MP4'}]`,src:mp4.url,type:"mp4"});});}
     (c.classPdf||[]).forEach(pdf=>{if(pdf.url) pdfs.push({name:pdf.name||"PDF",src:pdf.url});});
   });
 
-  // Video list
   const vl=document.getElementById("videoList");
   if(!videos.length){vl.innerHTML='<div class="empty-hint">No videos</div>';}
   else{
     vl.dataset.videos=JSON.stringify(videos);
-    vl.innerHTML=videos.map((v,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectVideo(${i},this)">
-      🎬 ${esc(v.title)} <span class="badge ${v.type==='mp4'?'badge-free':'badge-vod'}">${v.type.toUpperCase()}</span>
-      <br><small style="opacity:0.6;font-size:10px;">${v.src.substring(0,70)}...</small></div>`).join("");
+    vl.innerHTML=videos.map((v,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectVideo(${i},this)">🎬 ${esc(v.title)} <span class="badge ${v.type==='mp4'?'badge-free':'badge-vod'}">${v.type.toUpperCase()}</span><br><small style="opacity:0.6;font-size:10px;">${v.src.substring(0,70)}...</small></div>`).join("");
     playVideo(videos[0]);
   }
 
-  // PDF list
   const pl=document.getElementById("pdfList");
   if(!pdfs.length){pl.innerHTML='<div class="empty-hint">No PDFs</div>';}
-  else{
-    pl.dataset.pdfs=JSON.stringify(pdfs);
-    pl.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectPdf(${i},this)">📄 ${esc(p.name)}</div>`).join("");
-    loadPdf(pdfs[0]);
-  }
+  else{pl.dataset.pdfs=JSON.stringify(pdfs);pl.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" onclick="selectPdf(${i},this)">📄 ${esc(p.name)}</div>`).join("");loadPdf(pdfs[0]);}
 }
 
-/* ================= VIDEO PLAYER ================= */
 function selectVideo(i,el){
   document.querySelectorAll("#videoList .list-item").forEach(x=>x.classList.remove("playing"));
   el.classList.add("playing");
@@ -385,136 +299,55 @@ function selectVideo(i,el){
 }
 
 function playVideo(v){
-  console.log("▶️ Playing:",v.title,v.type,v.src);
+  console.log("▶️",v.title,v.type,v.src);
   const video=document.getElementById("hlsVideo");
   const debug=document.getElementById("videoDebug");
-  
   destroyPlayer();
-  
   debug.style.display="block";
-  debug.innerHTML=`<strong>🔗 Source:</strong> ${v.src.substring(0,80)}...<br><strong>📦 Type:</strong> ${v.type}<br><strong>⏳ Status:</strong> Loading via proxy...<br><a href="${v.src}" target="_blank" class="btn-open">📎 Open Raw Link</a>`;
-  
-  // Route through proxy
+
+  // ALL video requests go through proxy
   const proxyUrl = `/api/video?url=${encodeURIComponent(v.src)}`;
-  
-  if(v.type==="mp4" || v.src.includes('.mp4')){
-    debug.innerHTML+=`<br>✅ Direct MP4 (via proxy)`;
-    video.src = proxyUrl;
+  debug.innerHTML=`<strong>🔄 Proxy:</strong> /api/video<br><strong>📡 Target:</strong> ${v.src.substring(0,80)}...<br><strong>📦 Type:</strong> ${v.type}<br><a href="${v.src}" target="_blank" class="btn-open">📎 Raw Link</a>`;
+
+  if(v.type==="mp4"||v.src.includes('.mp4')){
+    debug.innerHTML+=`<br>✅ MP4 via proxy`;
+    video.src=proxyUrl;
     video.play().catch(e=>debug.innerHTML+=`<br>❌ ${e.message}`);
     return;
   }
-  
-  // HLS/m3u8 via HLS.js
+
   if(Hls.isSupported()){
-    debug.innerHTML+=`<br>✅ HLS.js supported`;
-    
-    hlsInstance = new Hls({
-      maxBufferLength: 60,
-      maxMaxBufferLength: 120,
-      enableWorker: true,
-      lowLatencyMode: false,
-      debug: false,
-      xhrSetup: function(xhr, url) {
-        // All requests already go through our proxy (m3u8 rewritten)
-        xhr.withCredentials = false;
-      }
-    });
-    
-    // Load through proxy
+    debug.innerHTML+=`<br>✅ HLS.js loaded`;
+    hlsInstance=new Hls({maxBufferLength:60,enableWorker:true,debug:false,xhrSetup:function(xhr){xhr.withCredentials=false;}});
     hlsInstance.loadSource(proxyUrl);
     hlsInstance.attachMedia(video);
-    
-    hlsInstance.on(Hls.Events.MANIFEST_PARSED, function(event, data){
-      debug.innerHTML+=`<br>✅ Manifest loaded · ${data.levels.length} qualities`;
-      video.play().catch(e=>debug.innerHTML+=`<br>⚠️ Autoplay blocked - click play`);
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED,(e,d)=>{debug.innerHTML+=`<br>✅ ${d.levels.length} qualities`;video.play().catch(()=>{});});
+    hlsInstance.on(Hls.Events.LEVEL_LOADED,(e,d)=>{debug.innerHTML+=`<br>📊 Level ${d.level} (${d.details.totalduration}s)`;});
+    hlsInstance.on(Hls.Events.ERROR,(e,d)=>{
+      debug.innerHTML+=`<br>❌ ${d.type}: ${d.details}`;
+      if(d.fatal){if(d.type===Hls.ErrorTypes.NETWORK_ERROR)hlsInstance.startLoad();else if(d.type===Hls.ErrorTypes.MEDIA_ERROR)hlsInstance.recoverMediaError();else{debug.innerHTML+=`<br>💀 Fatal`;hlsInstance.destroy();}}
     });
-    
-    hlsInstance.on(Hls.Events.LEVEL_LOADED, function(event, data){
-      debug.innerHTML+=`<br>📊 Level ${data.level} loaded · ${data.details.totalduration}s`;
-    });
-    
-    hlsInstance.on(Hls.Events.ERROR, function(event, data){
-      console.error("HLS Error:", data);
-      debug.innerHTML+=`<br>❌ ${data.type}: ${data.details}`;
-      
-      if(data.fatal){
-        switch(data.type){
-          case Hls.ErrorTypes.NETWORK_ERROR:
-            debug.innerHTML+=`<br>🔄 Retrying...`;
-            hlsInstance.startLoad();
-            break;
-          case Hls.ErrorTypes.MEDIA_ERROR:
-            debug.innerHTML+=`<br>🔄 Recovering...`;
-            hlsInstance.recoverMediaError();
-            break;
-          default:
-            debug.innerHTML+=`<br>💀 Fatal error`;
-            hlsInstance.destroy();
-            break;
-        }
-      }
-    });
-    
-  } else if(video.canPlayType('application/vnd.apple.mpegurl')){
-    // Safari native
-    debug.innerHTML+=`<br>✅ Native HLS (Safari)`;
-    video.src = proxyUrl;
-    video.play().catch(()=>{});
-  } else {
-    debug.innerHTML+=`<br>⚠️ No HLS support - try direct link above`;
+  }else if(video.canPlayType('application/vnd.apple.mpegurl')){
+    debug.innerHTML+=`<br>✅ Safari native`;
+    video.src=proxyUrl;video.play().catch(()=>{});
+  }else{
+    debug.innerHTML+=`<br>⚠️ No HLS support`;
+    video.src=proxyUrl;video.play().catch(()=>{});
   }
-  
-  // Timeout fallback
-  setTimeout(()=>{
-    if(video.paused && video.currentTime===0){
-      debug.innerHTML+=`<br><br>⏰ No playback after 8s<br><a href="${v.src}" target="_blank" class="btn-open">📎 Open Raw Link</a>
-      <br><button class="btn-small" onclick="playVideoRaw('${v.src.replace(/'/g,"\\'")}')">🔄 Retry Direct</button>`;
-    }
-  }, 8000);
+
+  setTimeout(()=>{if(video.paused&&video.currentTime===0)debug.innerHTML+=`<br><br>⏰ No playback after 8s<br><a href="${v.src}" target="_blank" class="btn-open">📎 Open Raw</a>`;},8000);
 }
 
-function playVideoRaw(url){
-  const video=document.getElementById("hlsVideo");
-  const debug=document.getElementById("videoDebug");
-  destroyPlayer();
-  debug.style.display="block";
-  debug.innerHTML=`<strong>🔄 Direct play:</strong> ${url.substring(0,80)}...`;
-  video.src=url;
-  video.play().catch(e=>debug.innerHTML+=`<br>❌ ${e.message}`);
-}
+function selectPdf(i,el){document.querySelectorAll("#pdfList .list-item").forEach(x=>x.classList.remove("playing"));el.classList.add("playing");loadPdf(JSON.parse(document.getElementById("pdfList").dataset.pdfs)[i]);}
+function loadPdf(p){document.getElementById("pdfViewer").src=`https://docs.google.com/gview?url=${encodeURIComponent(p.src)}&embedded=true`;}
 
-/* ================= PDF ================= */
-function selectPdf(i,el){
-  document.querySelectorAll("#pdfList .list-item").forEach(x=>x.classList.remove("playing"));
-  el.classList.add("playing");
-  loadPdf(JSON.parse(document.getElementById("pdfList").dataset.pdfs)[i]);
-}
-function loadPdf(p){
-  document.getElementById("pdfViewer").src=`https://docs.google.com/gview?url=${encodeURIComponent(p.src)}&embedded=true`;
-}
-
-/* ================= SEARCH ================= */
 async function handleSearch(val){
-  val=val.toLowerCase().trim();
-  if(!val){goApps();return;}
-  showView("viewTopics");
-  document.getElementById("topicsTitle").textContent=`Search: "${val}"`;
-  document.getElementById("facultyNote").hidden=true;
+  val=val.toLowerCase().trim();if(!val){goApps();return;}
+  showView("viewTopics");document.getElementById("topicsTitle").textContent=`Search: "${val}"`;document.getElementById("facultyNote").hidden=true;
   document.getElementById("topicsList").innerHTML='<div class="loading-spinner"><div class="spinner"></div> Searching...</div>';
-
-  const d=await apiGet("courses/active");
-  if(!d||!d.data){document.getElementById("topicsList").innerHTML='<div class="empty-hint">Failed</div>';return;}
-  const r=[];
-  for(const b of d.data){
-    if((b.title||'').toLowerCase().includes(val)||((b.facultyDetails||{}).name||'').toLowerCase().includes(val)){
-      const td=await apiGet("topic-and-section",{courseId:b.id});
-      if(td&&td.data&&td.data.topics) td.data.topics.forEach(t=>r.push({...t,batchName:b.title,batchId:b.id}));
-    }
-  }
-  document.getElementById("topicsList").innerHTML=r.length?r.slice(0,50).map(x=>
-    `<div class="topic-row" onclick="goPlayer('${x.batchId}','${x.topicId}','${esc(x.topicName)}')">
-      <div><div class="name">${esc(x.topicName)}</div><div class="sub">${esc(x.batchName)} · ${x.classCount||0} classes</div></div><span class="go">→</span></div>`
-  ).join(""):'<div class="empty-hint">No matches</div>';
+  const d=await apiGet("courses/active");if(!d||!d.data){document.getElementById("topicsList").innerHTML='<div class="empty-hint">Failed</div>';return;}
+  const r=[];for(const b of d.data){if((b.title||'').toLowerCase().includes(val)||((b.facultyDetails||{}).name||'').toLowerCase().includes(val)){const td=await apiGet("topic-and-section",{courseId:b.id});if(td&&td.data&&td.data.topics) td.data.topics.forEach(t=>r.push({...t,batchName:b.title,batchId:b.id}));}}
+  document.getElementById("topicsList").innerHTML=r.length?r.slice(0,50).map(x=>`<div class="topic-row" onclick="goPlayer('${x.batchId}','${x.topicId}','${esc(x.topicName)}')"><div><div class="name">${esc(x.topicName)}</div><div class="sub">${esc(x.batchName)} · ${x.classCount||0} classes</div></div><span class="go">→</span></div>`).join(""):'<div class="empty-hint">No matches</div>';
 }
 
 function esc(t){const d=document.createElement('div');d.textContent=t||'';return d.innerHTML;}
