@@ -9,215 +9,115 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
+<!-- HLS.js for m3u8 playback -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-/* ============ TOKENS ============ */
 :root{
-  --paper:#eef1f7;
-  --card:#ffffff;
-  --rule-bg:#f6f8fc;
-  --ink:#1b2333;
-  --ink-soft:#5b6478;
-  --border:rgba(27,35,51,0.09);
-  --rule:rgba(41,85,201,0.14);
-  --accent:#2955c9;
-  --accent-soft:#e7edfb;
-  --accent-2:#c8404f;
-  --gold:#c98a24;
-  --shadow:0 10px 30px -14px rgba(27,35,51,0.18);
-  --radius:12px;
+  --paper:#eef1f7;--card:#ffffff;--rule-bg:#f6f8fc;--ink:#1b2333;--ink-soft:#5b6478;
+  --border:rgba(27,35,51,0.09);--rule:rgba(41,85,201,0.14);--accent:#2955c9;
+  --accent-soft:#e7edfb;--accent-2:#c8404f;--gold:#c98a24;
+  --shadow:0 10px 30px -14px rgba(27,35,51,0.18);--radius:12px;
 }
 .dark{
-  --paper:#0e1017;
-  --card:#161a24;
-  --rule-bg:#141824;
-  --ink:#eef1f7;
-  --ink-soft:#98a1b8;
-  --border:rgba(255,255,255,0.08);
-  --rule:rgba(120,150,255,0.10);
-  --accent:#5c86ff;
-  --accent-soft:#1d2740;
-  --accent-2:#e2707c;
-  --gold:#e0ab52;
+  --paper:#0e1017;--card:#161a24;--rule-bg:#141824;--ink:#eef1f7;--ink-soft:#98a1b8;
+  --border:rgba(255,255,255,0.08);--rule:rgba(120,150,255,0.10);--accent:#5c86ff;
+  --accent-soft:#1d2740;--accent-2:#e2707c;--gold:#e0ab52;
   --shadow:0 10px 30px -14px rgba(0,0,0,0.5);
 }
-
 *{margin:0;padding:0;box-sizing:border-box;}
-body{
-  font-family:'Inter',sans-serif;
-  background:var(--paper);
-  color:var(--ink);
-  transition:background .25s ease,color .25s ease;
-  min-height:100vh;
-}
+body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);transition:background .25s ease,color .25s ease;min-height:100vh;}
 h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
-.hand{font-family:'Kalam',cursive;}
-.mono{font-family:'JetBrains Mono',monospace;}
+.hand{font-family:'Kalam',cursive;}.mono{font-family:'JetBrains Mono',monospace;}
 button,input{font-family:inherit;}
-.screen{animation:fadeIn .35s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 @media (prefers-reduced-motion: reduce){.screen{animation:none;}}
 
-/* ============ LOGIN ============ */
-#loginScreen{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;
-  padding:24px;position:relative;overflow:hidden;
-}
-#loginScreen::before{
-  content:"";position:absolute;inset:0;
-  background:repeating-linear-gradient(var(--rule) 0 1px, transparent 1px 40px);
-  opacity:.6;pointer-events:none;
-}
-.login-card{
-  position:relative;width:100%;max-width:400px;background:var(--card);
-  border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);
-  padding:34px 30px 28px;
-}
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
+#loginScreen::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(var(--rule) 0 1px, transparent 1px 40px);opacity:.6;pointer-events:none;}
+.login-card{position:relative;width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:34px 30px 28px;}
 .login-card .brand{font-size:26px;font-weight:700;letter-spacing:.5px;}
 .login-card .brand span{color:var(--accent);}
 .login-sub{color:var(--ink-soft);font-size:13px;margin-top:4px;margin-bottom:22px;}
-.mode-switch{
-  display:flex;background:var(--rule-bg);border:1px solid var(--border);
-  border-radius:10px;padding:3px;margin-bottom:18px;
-}
-.mode-switch button{
-  flex:1;border:none;background:transparent;color:var(--ink-soft);
-  padding:9px 0;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;
-  transition:background .2s,color .2s;
-}
+.mode-switch{display:flex;background:var(--rule-bg);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:18px;}
+.mode-switch button{flex:1;border:none;background:transparent;color:var(--ink-soft);padding:9px 0;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;transition:background .2s,color .2s;}
 .mode-switch button.active{background:var(--accent);color:#fff;}
 .field{margin-bottom:14px;}
 .field label{font-size:12px;color:var(--ink-soft);display:block;margin-bottom:6px;font-weight:500;}
 .field .row{display:flex;align-items:center;border:1px solid var(--border);border-radius:10px;background:var(--rule-bg);overflow:hidden;}
 .field .prefix{padding:11px 10px;color:var(--ink-soft);font-size:14px;border-right:1px solid var(--border);}
 .field input{flex:1;border:none;background:transparent;outline:none;padding:11px 12px;color:var(--ink);font-size:14px;}
-.btn-primary{
-  width:100%;padding:12px;border:none;border-radius:10px;
-  background:var(--accent);color:#fff;font-weight:600;font-size:14px;
-  cursor:pointer;margin-top:6px;transition:filter .15s, transform .15s;
-}
+.btn-primary{width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;cursor:pointer;margin-top:6px;transition:filter .15s, transform .15s;}
 .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.skip-link{
-  display:block;text-align:center;margin-top:16px;font-size:13px;
-  color:var(--ink-soft);cursor:pointer;text-decoration:underline;text-underline-offset:3px;
-}
+.skip-link{display:block;text-align:center;margin-top:16px;font-size:13px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
 .skip-link:hover{color:var(--accent);}
-.login-note{
-  margin-top:18px;font-size:12px;color:var(--ink-soft);
-  border-top:1px dashed var(--border);padding-top:12px;
-}
+.login-note{margin-top:18px;font-size:12px;color:var(--ink-soft);border-top:1px dashed var(--border);padding-top:12px;}
 .error-msg{color:var(--accent-2);font-size:12px;margin-top:-6px;margin-bottom:10px;display:none;}
 
-/* ============ HEADER ============ */
-.main-header{
-  position:relative;display:flex;justify-content:space-between;align-items:center;
-  padding:16px 22px;background:var(--card);border-bottom:1px solid var(--border);
-}
+.main-header{position:relative;display:flex;justify-content:space-between;align-items:center;padding:16px 22px;background:var(--card);border-bottom:1px solid var(--border);}
 .brand-mark{font-size:24px;font-weight:700;display:flex;align-items:baseline;gap:8px;}
 .brand-mark .tag{font-size:11px;color:var(--ink-soft);letter-spacing:2px;font-weight:500;}
 .brand-mark span{color:var(--accent);}
 .header-actions{display:flex;align-items:center;gap:10px;}
-.pill-btn{
-  cursor:pointer;padding:8px 14px;border-radius:20px;background:var(--rule-bg);
-  border:1px solid var(--border);font-size:13px;color:var(--ink-soft);font-weight:500;
-}
+.pill-btn{cursor:pointer;padding:8px 14px;border-radius:20px;background:var(--rule-bg);border:1px solid var(--border);font-size:13px;color:var(--ink-soft);font-weight:500;}
 .pill-btn:hover{color:var(--ink);}
 .gradient-bar{height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-2));}
 
-/* Loading */
-.loading-spinner{
-  display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;
-  color:var(--ink-soft);font-size:14px;
-}
-.spinner{
-  width:24px;height:24px;border:3px solid var(--border);
-  border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;
-}
+.loading-spinner{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--ink-soft);font-size:14px;}
+.spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ============ SEARCH ============ */
 .search-wrap{padding:16px 22px 4px;}
-.search-wrap input{
-  width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);
-  outline:none;background:var(--card);color:var(--ink);font-size:14px;
-}
+.search-wrap input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);outline:none;background:var(--card);color:var(--ink);font-size:14px;}
 .search-wrap input:focus{border-color:var(--accent);}
 
-/* ============ BREADCRUMB ============ */
-.breadcrumb{
-  padding:14px 22px 0;display:flex;flex-wrap:wrap;align-items:center;gap:6px;
-  font-size:15px;color:var(--accent);
-}
+.breadcrumb{padding:14px 22px 0;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:15px;color:var(--accent);}
 .breadcrumb .crumb{cursor:pointer;}
 .breadcrumb .crumb:hover{text-decoration:underline;}
 .breadcrumb .crumb.current{color:var(--ink-soft);cursor:default;text-decoration:none;}
 .breadcrumb .arrow{color:var(--ink-soft);font-size:13px;}
 
-/* ============ VIEWS ============ */
 .view{padding:18px 22px 40px;}
 .view-title{font-size:22px;font-weight:700;margin-bottom:4px;}
 .view-hint{font-family:'Kalam',cursive;color:var(--accent);font-size:14px;margin-bottom:18px;display:inline-block;}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
-.nav-card{
-  background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);
-  border-radius:var(--radius);padding:18px;cursor:pointer;box-shadow:var(--shadow);
-  transition:transform .15s ease;
-}
+.nav-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:18px;cursor:pointer;box-shadow:var(--shadow);transition:transform .15s ease;}
 .nav-card:hover{transform:translateY(-3px);}
 .nav-card .icon{font-size:26px;margin-bottom:10px;display:block;}
 .nav-card h3{font-size:16px;margin-bottom:4px;}
 .nav-card p{font-size:12.5px;color:var(--ink-soft);}
 .nav-card .meta{margin-top:10px;font-size:11px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;}
 .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;margin-left:4px;}
-.badge-live{background:#fecaca;color:#991b1b;}
-.badge-vod{background:#dbeafe;color:#1e40af;}
-.badge-free{background:#d1fae5;color:#065f46;}
-.badge-paid{background:#fef3c7;color:#92400e;}
+.badge-live{background:#fecaca;color:#991b1b;}.badge-vod{background:#dbeafe;color:#1e40af;}
+.badge-free{background:#d1fae5;color:#065f46;}.badge-paid{background:#fef3c7;color:#92400e;}
 
-.faculty-note{
-  display:inline-flex;align-items:center;gap:10px;
-  background:var(--gold);color:#231a04;font-family:'Kalam',cursive;font-weight:700;font-size:15px;
-  padding:10px 16px;border-radius:6px;transform:rotate(-1.5deg);
-  box-shadow:0 6px 14px -6px rgba(0,0,0,0.35);margin-bottom:20px;
-}
+.faculty-note{display:inline-flex;align-items:center;gap:10px;background:var(--gold);color:#231a04;font-family:'Kalam',cursive;font-weight:700;font-size:15px;padding:10px 16px;border-radius:6px;transform:rotate(-1.5deg);box-shadow:0 6px 14px -6px rgba(0,0,0,0.35);margin-bottom:20px;}
 .faculty-note .pin{width:8px;height:8px;border-radius:50%;background:var(--accent-2);}
 
 .topic-list{display:flex;flex-direction:column;gap:10px;}
-.topic-row{
-  display:flex;justify-content:space-between;align-items:center;
-  background:var(--card);border:1px solid var(--border);border-radius:10px;
-  padding:14px 16px;cursor:pointer;transition:background .15s;
-}
+.topic-row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:background .15s;}
 .topic-row:hover{background:var(--accent-soft);}
 .topic-row .name{font-weight:600;font-size:14.5px;}
 .topic-row .sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
 .topic-row .go{color:var(--accent);font-size:18px;}
 
-/* ============ PLAYER ============ */
 .player-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
 @media(max-width:900px){.player-grid{grid-template-columns:1fr;}}
-.panel{
-  background:var(--card);border:1px solid var(--border);border-radius:16px;
-  padding:16px;box-shadow:var(--shadow);
-}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);}
 .panel h3{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 video{width:100%;border-radius:10px;background:#000;display:block;}
 iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--rule-bg);}
-.list-item{
-  margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--rule-bg);
-  cursor:pointer;font-size:13.5px;border:1px solid transparent;word-break:break-all;
-}
+.list-item{margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--rule-bg);cursor:pointer;font-size:13.5px;border:1px solid transparent;word-break:break-all;}
 .list-item:hover{border-color:var(--accent);}
 .list-item.playing{background:var(--accent);color:#fff;}
 .empty-hint{color:var(--ink-soft);font-size:13px;font-style:italic;}
+.video-debug{font-size:11px;color:var(--accent-2);margin-top:8px;padding:8px;background:var(--rule-bg);border-radius:6px;word-break:break-all;display:none;}
 [hidden]{display:none!important;}
 </style>
 </head>
 
 <body>
 
-<!-- ============ LOGIN SCREEN ============ -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="brand">Engineers<span> Babu</span></div>
@@ -247,7 +147,6 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
   </div>
 </div>
 
-<!-- ============ MAIN APP ============ -->
 <div id="mainScreen" hidden>
   <header class="main-header">
     <div class="brand-mark">Engineers<span> Babu</span><span class="tag">&nbsp;· LEARNING</span></div>
@@ -264,21 +163,18 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 
   <div class="breadcrumb" id="breadcrumb"></div>
 
-  <!-- LEVEL 1 -->
   <div class="view" id="viewApps">
     <div class="view-title">My Apps</div>
     <span class="view-hint">↓ tap any one to open it</span>
     <div class="card-grid" id="appsGrid">
       <div class="nav-card" onclick="goBatches('selectionway')">
-        <span class="icon">🎓</span>
-        <h3>Selection Way</h3>
+        <span class="icon">🎓</span><h3>Selection Way</h3>
         <p>All batches · Live & Recorded</p>
         <div class="meta" id="swMeta">Loading...</div>
       </div>
     </div>
   </div>
 
-  <!-- LEVEL 2 -->
   <div class="view" id="viewBatches" hidden>
     <div class="view-title" id="batchesTitle">All Batches</div>
     <span class="view-hint">↓ click on any batch</span>
@@ -286,7 +182,6 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
     <div class="card-grid" id="batchesGrid"></div>
   </div>
 
-  <!-- LEVEL 3 -->
   <div class="view" id="viewTopics" hidden>
     <div class="view-title" id="topicsTitle">Topics</div>
     <div class="faculty-note" id="facultyNote"><span class="pin"></span><span id="facultyName">Faculty</span></div>
@@ -294,7 +189,6 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
     <div class="topic-list" id="topicsList"></div>
   </div>
 
-  <!-- LEVEL 4 -->
   <div class="view" id="viewPlayer" hidden>
     <div class="view-title" id="playerTitle">Topic</div>
     <span class="view-hint" id="playerHint">↓ click any video or pdf below</span>
@@ -303,8 +197,9 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
       <div class="panel">
         <h3>🎬 Video (HLS/m3u8)</h3>
         <div id="videoPlayer">
-          <video id="hlsVideo" controls autoplay style="width:100%;border-radius:10px;background:#000;"></video>
+          <video id="hlsVideo" controls autoplay playsinline style="width:100%;border-radius:10px;background:#000;min-height:240px;"></video>
         </div>
+        <div class="video-debug" id="videoDebug"></div>
         <div id="videoList"></div>
       </div>
       <div class="panel">
@@ -318,37 +213,24 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 
 <script>
 /* ================= CONFIG ================= */
-// Use local Koyeb proxy - NO CORS issues!
-const PROXY_BASE = "/api/proxy?endpoint=";
+const PROXY_API = "/api/proxy?endpoint=";
+const PROXY_VIDEO = "/api/video?url=";
 const USER_ID = "";
 
 /* ================= STATE ================= */
 let state = { loggedIn:false, mode:"mobile", appId:null, batchId:null, topicId:null, batchName:null, topicName:null, classTitle:null };
 let hlsInstance = null;
 
-/* ================= API HELPERS (via Koyeb Proxy) ================= */
+/* ================= API ================= */
 async function apiGet(endpoint, params = {}){
   params.userId = USER_ID;
-  
-  // Build proxy URL
-  const queryParts = [`endpoint=${encodeURIComponent(endpoint)}`];
-  for(const [k,v] of Object.entries(params)){
-    if(v) queryParts.push(`${k}=${encodeURIComponent(v)}`);
-  }
-  
-  const proxyUrl = PROXY_BASE + queryParts.join("&");
-  // Fix: PROXY_BASE already has endpoint=, so reconstruct properly
   const url = `/api/proxy?endpoint=${encodeURIComponent(endpoint)}&` + 
     Object.entries(params).filter(([,v])=>v).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
-  
   try {
     const resp = await fetch(url);
     if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
     return await resp.json();
-  } catch(e){
-    console.error("API Error:", e);
-    return null;
-  }
+  } catch(e){ console.error("API Error:", e); return null; }
 }
 
 /* ================= LOGIN ================= */
@@ -366,19 +248,11 @@ function handleLogin(e){
   errEl.style.display = "none";
   if(state.mode==="mobile"){
     const val = document.getElementById("mobileInput").value.trim();
-    if(!/^[6-9]\d{9}$/.test(val)){
-      errEl.textContent = "Enter a valid 10-digit Indian mobile number.";
-      errEl.style.display = "block";
-      return false;
-    }
+    if(!/^[6-9]\d{9}$/.test(val)){ errEl.textContent="Enter a valid 10-digit Indian mobile number."; errEl.style.display="block"; return false; }
     enterApp(true, "+91 "+val);
   } else {
     const val = document.getElementById("emailInput").value.trim();
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
-      errEl.textContent = "Enter a valid email address.";
-      errEl.style.display = "block";
-      return false;
-    }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){ errEl.textContent="Enter a valid email address."; errEl.style.display="block"; return false; }
     enterApp(true, val);
   }
   return false;
@@ -389,28 +263,19 @@ function enterApp(loggedIn, identity){
   document.getElementById("loginScreen").hidden = true;
   document.getElementById("mainScreen").hidden = false;
   document.getElementById("userPill").textContent = loggedIn ? identity : "Guest";
-  loadSWMeta();
-  renderApps();
-  renderBreadcrumb();
+  loadSWMeta(); renderApps(); renderBreadcrumb();
 }
 
 async function loadSWMeta(){
   const data = await apiGet("courses/active");
-  if(data && data.state===200 && data.data){
-    document.getElementById("swMeta").textContent = data.data.length + " batches";
-  } else {
-    document.getElementById("swMeta").textContent = "Tap to load";
-  }
+  document.getElementById("swMeta").textContent = (data&&data.data) ? data.data.length+" batches" : "Tap to load";
 }
 
-/* ================= THEME ================= */
 function toggleTheme(){ document.body.classList.toggle("dark"); }
 
 /* ================= NAVIGATION ================= */
 function showView(name){
-  ["viewApps","viewBatches","viewTopics","viewPlayer"].forEach(v=>{
-    document.getElementById(v).hidden = (v!==name);
-  });
+  ["viewApps","viewBatches","viewTopics","viewPlayer"].forEach(v=>document.getElementById(v).hidden=(v!==name));
 }
 
 function renderBreadcrumb(){
@@ -418,133 +283,117 @@ function renderBreadcrumb(){
   if(state.batchId) parts.push({label:state.batchName||"Batch", fn:()=>goBatches('selectionway')});
   if(state.topicId) parts.push({label:state.topicName||"Topic", fn:()=>goTopics('selectionway',state.batchId,state.batchName)});
   if(state.classTitle) parts.push({label:state.classTitle, fn:null});
-
   const bc = document.getElementById("breadcrumb");
-  bc.innerHTML = parts.map((p,i)=>{
-    const isLast = i===parts.length-1;
-    return (i>0 ? '<span class="arrow">↓</span>' : '') +
-      `<span class="crumb ${isLast?'current':''}">${p.label}</span>`;
-  }).join(" ");
-  bc.querySelectorAll(".crumb").forEach((el,i)=>{
-    if(parts[i].fn) el.onclick = parts[i].fn;
-  });
+  bc.innerHTML = parts.map((p,i)=>(i>0?'<span class="arrow">↓</span>':'')+`<span class="crumb ${i===parts.length-1?'current':''}">${p.label}</span>`).join(" ");
+  bc.querySelectorAll(".crumb").forEach((el,i)=>{ if(parts[i].fn) el.onclick=parts[i].fn; });
 }
 
 function renderApps(){ showView("viewApps"); renderBreadcrumb(); }
 function goApps(){ 
-  state.appId=null; state.batchId=null; state.topicId=null; state.classTitle=null;
-  state.batchName=null; state.topicName=null;
-  if(hlsInstance){ hlsInstance.destroy(); hlsInstance=null; }
-  renderApps(); 
+  state.appId=null;state.batchId=null;state.topicId=null;state.classTitle=null;state.batchName=null;state.topicName=null;
+  if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}
+  renderApps();
 }
 
-/* ================= LEVEL 2: BATCHES ================= */
+/* ================= BATCHES ================= */
 async function goBatches(appId){
-  state.appId=appId; state.batchId=null; state.topicId=null; state.classTitle=null;
-  state.batchName=null; state.topicName=null;
-  if(hlsInstance){ hlsInstance.destroy(); hlsInstance=null; }
+  state.appId=appId;state.batchId=null;state.topicId=null;state.classTitle=null;state.batchName=null;state.topicName=null;
+  if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}
   showView("viewBatches");
-  document.getElementById("batchesTitle").textContent = "Selection Way — All Batches";
-  document.getElementById("batchesGrid").innerHTML = "";
-  document.getElementById("batchesLoading").hidden = false;
+  document.getElementById("batchesTitle").textContent="Selection Way — All Batches";
+  document.getElementById("batchesGrid").innerHTML="";
+  document.getElementById("batchesLoading").hidden=false;
   renderBreadcrumb();
 
   const data = await apiGet("courses/active");
-  document.getElementById("batchesLoading").hidden = true;
+  document.getElementById("batchesLoading").hidden=true;
 
-  if(!data || data.state!==200 || !data.data || !data.data.length){
-    document.getElementById("batchesGrid").innerHTML = '<div class="empty-hint" style="padding:20px;">No batches found.</div>';
-    return;
+  if(!data||!data.data||!data.data.length){
+    document.getElementById("batchesGrid").innerHTML='<div class="empty-hint" style="padding:20px;">No batches found.</div>';return;
   }
-
   document.getElementById("batchesGrid").innerHTML = data.data.map(b=>{
-    const title = escapeHtml(b.title||'Untitled');
-    const faculty = escapeHtml((b.facultyDetails||{}).name || "Unknown");
-    const isLive = b.isLive ? '<span class="badge badge-live">🔴 LIVE</span>' : '<span class="badge badge-vod">📺 VOD</span>';
-    const isFree = b.isFree ? '<span class="badge badge-free">🆓 FREE</span>' : '<span class="badge badge-paid">💎 PAID</span>';
-    return `<div class="nav-card" onclick="goTopics('selectionway','${b.id}','${title}')">
-      <span class="icon">📚</span><h3>${title}</h3><p>${faculty}</p><div class="meta">${isLive} ${isFree}</div></div>`;
+    const t=escapeHtml(b.title||'Untitled'), f=escapeHtml((b.facultyDetails||{}).name||"Unknown");
+    return `<div class="nav-card" onclick="goTopics('selectionway','${b.id}','${t}')"><span class="icon">📚</span><h3>${t}</h3><p>${f}</p>
+      <div class="meta">${b.isLive?'<span class="badge badge-live">🔴 LIVE</span>':'<span class="badge badge-vod">📺 VOD</span>'} ${b.isFree?'<span class="badge badge-free">🆓 FREE</span>':'<span class="badge badge-paid">💎 PAID</span>'}</div></div>`;
   }).join("");
 }
 
-/* ================= LEVEL 3: TOPICS ================= */
-async function goTopics(appId, batchId, batchName){
-  state.appId=appId; state.batchId=batchId; state.topicId=null; state.classTitle=null;
-  state.batchName=batchName; state.topicName=null;
-  if(hlsInstance){ hlsInstance.destroy(); hlsInstance=null; }
+/* ================= TOPICS ================= */
+async function goTopics(appId,batchId,batchName){
+  state.appId=appId;state.batchId=batchId;state.topicId=null;state.classTitle=null;state.batchName=batchName;state.topicName=null;
+  if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}
   showView("viewTopics");
-  document.getElementById("topicsTitle").textContent = batchName||"Topics";
-  document.getElementById("topicsList").innerHTML = "";
-  document.getElementById("topicsLoading").hidden = false;
-  document.getElementById("facultyNote").hidden = true;
+  document.getElementById("topicsTitle").textContent=batchName||"Topics";
+  document.getElementById("topicsList").innerHTML="";
+  document.getElementById("topicsLoading").hidden=false;
+  document.getElementById("facultyNote").hidden=true;
   renderBreadcrumb();
 
-  const data = await apiGet("topic-and-section", {courseId: batchId});
-  document.getElementById("topicsLoading").hidden = true;
+  const data = await apiGet("topic-and-section",{courseId:batchId});
+  document.getElementById("topicsLoading").hidden=true;
 
-  if(!data || data.state!==200 || !data.data || !data.data.topics || !data.data.topics.length){
-    document.getElementById("topicsList").innerHTML = '<div class="empty-hint" style="padding:20px;">No topics found.</div>';
-    return;
+  if(!data||!data.data||!data.data.topics||!data.data.topics.length){
+    document.getElementById("topicsList").innerHTML='<div class="empty-hint" style="padding:20px;">No topics found.</div>';return;
   }
-
-  if(data.data.facultyDetails && data.data.facultyDetails.name){
-    document.getElementById("facultyNote").hidden = false;
-    document.getElementById("facultyName").textContent = data.data.facultyDetails.name;
+  if(data.data.facultyDetails&&data.data.facultyDetails.name){
+    document.getElementById("facultyNote").hidden=false;
+    document.getElementById("facultyName").textContent=data.data.facultyDetails.name;
   }
-
-  document.getElementById("topicsList").innerHTML = data.data.topics.map(t=>`
-    <div class="topic-row" onclick="goPlayer('selectionway','${batchId}','${t.topicId}','${escapeHtml(t.topicName||'Untitled')}')">
-      <div><div class="name">${escapeHtml(t.topicName||'Untitled')}</div><div class="sub">${t.classCount||0} classes</div></div>
-      <span class="go">→</span></div>`).join("");
+  document.getElementById("topicsList").innerHTML=data.data.topics.map(t=>
+    `<div class="topic-row" onclick="goPlayer('selectionway','${batchId}','${t.topicId}','${escapeHtml(t.topicName||'Untitled')}')">
+      <div><div class="name">${escapeHtml(t.topicName||'Untitled')}</div><div class="sub">${t.classCount||0} classes</div></div><span class="go">→</span></div>`
+  ).join("");
 }
 
-/* ================= LEVEL 4: PLAYER ================= */
-async function goPlayer(appId, batchId, topicId, topicName){
-  state.appId=appId; state.batchId=batchId; state.topicId=topicId; state.classTitle=null;
-  state.topicName=topicName;
-  if(hlsInstance){ hlsInstance.destroy(); hlsInstance=null; }
+/* ================= PLAYER ================= */
+async function goPlayer(appId,batchId,topicId,topicName){
+  state.appId=appId;state.batchId=batchId;state.topicId=topicId;state.classTitle=null;state.topicName=topicName;
+  if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}
   showView("viewPlayer");
-  document.getElementById("playerTitle").textContent = topicName||"Player";
-  document.getElementById("videoList").innerHTML = "";
-  document.getElementById("pdfList").innerHTML = "";
-  document.getElementById("pdfViewer").src = "";
-  document.getElementById("playerLoading").hidden = false;
+  document.getElementById("playerTitle").textContent=topicName||"Player";
+  document.getElementById("videoList").innerHTML="";
+  document.getElementById("pdfList").innerHTML="";
+  document.getElementById("pdfViewer").src="";
+  document.getElementById("playerLoading").hidden=false;
+  document.getElementById("videoDebug").style.display="none";
   renderBreadcrumb();
 
-  const data = await apiGet(`topics/${topicId}/classes`, {courseId: batchId});
-  document.getElementById("playerLoading").hidden = true;
+  const data = await apiGet(`topics/${topicId}/classes`,{courseId:batchId});
+  document.getElementById("playerLoading").hidden=true;
 
-  if(!data || data.state!==200 || !data.data || !data.data.classes || !data.data.classes.length){
-    document.getElementById("videoList").innerHTML = '<div class="empty-hint">No classes found.</div>';
-    document.getElementById("pdfList").innerHTML = '<div class="empty-hint">No PDFs found.</div>';
+  if(!data||!data.data||!data.data.classes||!data.data.classes.length){
+    document.getElementById("videoList").innerHTML='<div class="empty-hint">No classes found.</div>';
+    document.getElementById("pdfList").innerHTML='<div class="empty-hint">No PDFs found.</div>';
     return;
   }
 
-  const videos = [], pdfs = [];
-  data.data.classes.forEach(cls => {
-    const title = cls.title||"Untitled";
-    if(cls.class_link) videos.push({title, src:cls.class_link});
-    (cls.classPdf||[]).forEach(pdf => { if(pdf.url) pdfs.push({name:pdf.name||"PDF", src:pdf.url, classTitle:title}); });
+  const videos=[], pdfs=[];
+  data.data.classes.forEach(cls=>{
+    const title=cls.title||"Untitled";
+    if(cls.class_link) videos.push({title, src:cls.class_link, classId:cls.classId});
+    (cls.classPdf||[]).forEach(pdf=>{if(pdf.url) pdfs.push({name:pdf.name||"PDF",src:pdf.url,classTitle:title});});
   });
 
-  const vList = document.getElementById("videoList");
-  if(!videos.length){ vList.innerHTML = '<div class="empty-hint">No HLS/m3u8 videos found.</div>'; }
+  // Videos
+  const vList=document.getElementById("videoList");
+  if(!videos.length){ vList.innerHTML='<div class="empty-hint">No HLS/m3u8 videos found.</div>'; }
   else {
-    vList.dataset.videos = JSON.stringify(videos);
-    vList.innerHTML = videos.map((v,i)=>`<div class="list-item ${i===0?'playing':''}" data-idx="${i}" onclick="selectVideo(${i},this)">🎬 ${escapeHtml(v.title)}</div>`).join("");
+    vList.dataset.videos=JSON.stringify(videos);
+    vList.innerHTML=videos.map((v,i)=>`<div class="list-item ${i===0?'playing':''}" data-idx="${i}" onclick="selectVideo(${i},this)">🎬 ${escapeHtml(v.title)}<br><small style="font-size:10px;opacity:0.7;">${v.src.substring(0,80)}...</small></div>`).join("");
     playVideo(videos[0]);
   }
 
-  const pList = document.getElementById("pdfList");
-  if(!pdfs.length){ pList.innerHTML = '<div class="empty-hint">No PDFs found.</div>'; }
+  // PDFs
+  const pList=document.getElementById("pdfList");
+  if(!pdfs.length){ pList.innerHTML='<div class="empty-hint">No PDFs found.</div>'; }
   else {
-    pList.dataset.pdfs = JSON.stringify(pdfs);
-    pList.innerHTML = pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" data-idx="${i}" onclick="selectPdf(${i},this)">📄 ${escapeHtml(p.name)}</div>`).join("");
+    pList.dataset.pdfs=JSON.stringify(pdfs);
+    pList.innerHTML=pdfs.map((p,i)=>`<div class="list-item ${i===0?'playing':''}" data-idx="${i}" onclick="selectPdf(${i},this)">📄 ${escapeHtml(p.name)}</div>`).join("");
     loadPdf(pdfs[0]);
   }
 }
 
-/* ================= HLS PLAYER ================= */
+/* ================= VIDEO PLAYER (FIXED) ================= */
 function selectVideo(i, el){
   document.querySelectorAll("#videoList .list-item").forEach(x=>x.classList.remove("playing"));
   el.classList.add("playing");
@@ -555,22 +404,127 @@ function selectVideo(i, el){
 }
 
 function playVideo(v){
-  const video = document.getElementById("hlsVideo");
+  console.log("🎬 Playing:", v.title);
+  console.log("📡 Source:", v.src);
+  
+  const videoEl = document.getElementById("hlsVideo");
+  const debugEl = document.getElementById("videoDebug");
+  
+  // Destroy previous instance
   if(hlsInstance){ hlsInstance.destroy(); hlsInstance=null; }
-  video.pause(); video.removeAttribute("src"); video.load();
-
-  if(Hls.isSupported()){
-    hlsInstance = new Hls({maxBufferLength:30, enableWorker:true});
-    hlsInstance.loadSource(v.src);
-    hlsInstance.attachMedia(video);
-    hlsInstance.on(Hls.Events.MANIFEST_PARSED, ()=>video.play().catch(()=>{}));
-    hlsInstance.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal)hlsInstance.startLoad();});
-  } else if(video.canPlayType('application/vnd.apple.mpegurl')){
-    video.src = v.src;
-    video.addEventListener('loadedmetadata', ()=>video.play().catch(()=>{}));
+  
+  // Reset video
+  videoEl.pause();
+  videoEl.removeAttribute("src");
+  videoEl.load();
+  
+  // Show debug info
+  debugEl.style.display = "block";
+  debugEl.innerHTML = `🔗 Source: ${v.src.substring(0,100)}...<br>⏳ Loading...`;
+  
+  const src = v.src;
+  
+  // Check if it's an HLS/m3u8 stream
+  const isHLS = src.includes('.m3u8') || src.includes('master.mpd') || 
+                src.includes('cloudfront.net') || src.includes('manifest');
+  
+  if(isHLS && Hls.isSupported()){
+    debugEl.innerHTML += "<br>✅ Using HLS.js";
+    
+    hlsInstance = new Hls({
+      maxBufferLength: 60,
+      maxMaxBufferLength: 120,
+      enableWorker: true,
+      lowLatencyMode: false,
+      backBufferLength: 90,
+      // Handle CORS
+      xhrSetup: function(xhr, url) {
+        xhr.withCredentials = false;
+      }
+    });
+    
+    hlsInstance.loadSource(src);
+    hlsInstance.attachMedia(videoEl);
+    
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED, function(event, data){
+      console.log("✅ HLS manifest loaded:", data.levels.length, "quality levels");
+      debugEl.innerHTML = `🔗 Source: ${src.substring(0,80)}...<br>✅ Manifest loaded · ${data.levels.length} quality levels<br>▶️ Playing...`;
+      videoEl.play().catch(e => {
+        console.log("Autoplay blocked:", e);
+        debugEl.innerHTML += "<br>⚠️ Click play button to start";
+      });
+    });
+    
+    hlsInstance.on(Hls.Events.ERROR, function(event, data){
+      console.error("HLS Error:", data.type, data.details);
+      debugEl.innerHTML += `<br>❌ Error: ${data.details}`;
+      
+      if(data.fatal){
+        switch(data.type){
+          case Hls.ErrorTypes.NETWORK_ERROR:
+            debugEl.innerHTML += "<br>🔄 Retrying network...";
+            hlsInstance.startLoad();
+            break;
+          case Hls.ErrorTypes.MEDIA_ERROR:
+            debugEl.innerHTML += "<br>🔄 Recovering media...";
+            hlsInstance.recoverMediaError();
+            break;
+          default:
+            debugEl.innerHTML += "<br>❌ Cannot recover";
+            hlsInstance.destroy();
+            break;
+        }
+      }
+    });
+    
+  } else if(videoEl.canPlayType('application/vnd.apple.mpegurl')){
+    // Safari native HLS
+    debugEl.innerHTML += "<br>✅ Using native HLS (Safari)";
+    videoEl.src = src;
+    videoEl.play().catch(()=>{});
   } else {
-    document.getElementById("videoPlayer").innerHTML = '<div class="empty-hint">HLS not supported. Use Chrome/Safari.</div>';
+    // Try direct MP4 or fallback
+    debugEl.innerHTML += "<br>⚠️ Trying direct playback...";
+    
+    // Try as MP4
+    if(src.includes('.mp4') || src.includes('.ts')){
+      videoEl.src = src;
+      videoEl.play().catch(e => {
+        debugEl.innerHTML += `<br>❌ Playback failed: ${e.message}`;
+      });
+    } else {
+      // Last resort: try HLS.js anyway
+      debugEl.innerHTML += "<br>🔄 Forcing HLS.js...";
+      
+      hlsInstance = new Hls({
+        maxBufferLength: 60,
+        enableWorker: true,
+        xhrSetup: function(xhr, url) {
+          xhr.withCredentials = false;
+        }
+      });
+      
+      hlsInstance.loadSource(src);
+      hlsInstance.attachMedia(videoEl);
+      
+      hlsInstance.on(Hls.Events.MANIFEST_PARSED, function(){
+        debugEl.innerHTML += "<br>✅ Playing via forced HLS";
+        videoEl.play().catch(()=>{});
+      });
+      
+      hlsInstance.on(Hls.Events.ERROR, function(event, data){
+        debugEl.innerHTML += `<br>❌ HLS failed: ${data.details}<br>📎 Raw URL: <a href="${src}" target="_blank">Open directly</a>`;
+        if(data.fatal) hlsInstance.destroy();
+      });
+    }
   }
+  
+  // Fallback: show direct link after 5 seconds if nothing plays
+  setTimeout(() => {
+    if(videoEl.paused && videoEl.currentTime === 0){
+      debugEl.innerHTML += `<br><br>📎 <a href="${src}" target="_blank" style="color:var(--accent);">Click here to open video directly</a>`;
+    }
+  }, 5000);
 }
 
 /* ================= PDF ================= */
@@ -586,25 +540,25 @@ function loadPdf(p){
 
 /* ================= SEARCH ================= */
 async function handleSearch(val){
-  val = val.toLowerCase().trim();
+  val=val.toLowerCase().trim();
   if(!val){ goApps(); return; }
   showView("viewTopics");
-  document.getElementById("topicsTitle").textContent = `Search: "${val}"`;
-  document.getElementById("facultyNote").hidden = true;
-  document.getElementById("topicsList").innerHTML = '<div class="loading-spinner"><div class="spinner"></div> Searching...</div>';
+  document.getElementById("topicsTitle").textContent=`Search: "${val}"`;
+  document.getElementById("facultyNote").hidden=true;
+  document.getElementById("topicsList").innerHTML='<div class="loading-spinner"><div class="spinner"></div> Searching...</div>';
 
-  const data = await apiGet("courses/active");
+  const data=await apiGet("courses/active");
   if(!data||!data.data){ document.getElementById("topicsList").innerHTML='<div class="empty-hint">Search failed.</div>'; return; }
 
-  const results = [];
+  const results=[];
   for(const b of data.data){
-    if((b.title||'').toLowerCase().includes(val) || ((b.facultyDetails||{}).name||'').toLowerCase().includes(val)){
-      const td = await apiGet("topic-and-section",{courseId:b.id});
+    if((b.title||'').toLowerCase().includes(val)||((b.facultyDetails||{}).name||'').toLowerCase().includes(val)){
+      const td=await apiGet("topic-and-section",{courseId:b.id});
       if(td&&td.data&&td.data.topics) td.data.topics.forEach(t=>results.push({...t,batchName:b.title,batchId:b.id}));
     }
   }
 
-  document.getElementById("topicsList").innerHTML = results.length 
+  document.getElementById("topicsList").innerHTML=results.length
     ? results.slice(0,50).map(r=>`<div class="topic-row" onclick="goPlayer('selectionway','${r.batchId}','${r.topicId}','${escapeHtml(r.topicName)}')">
       <div><div class="name">${escapeHtml(r.topicName)}</div><div class="sub">${escapeHtml(r.batchName)} · ${r.classCount||0} classes</div></div><span class="go">→</span></div>`).join("")
     : '<div class="empty-hint">No matches found.</div>';
