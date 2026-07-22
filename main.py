@@ -2,20 +2,17 @@
 """
 Engineers Babu - Koyeb Edition
 ===============================
-Python server that:
-1. Serves the index.html frontend
-2. Acts as CORS proxy for SelectionWay API
-3. Proxies video segments for HLS playback
+Spoofs real browser to bypass SelectionWay blocks.
 """
 
 import os
 import sys
 import json
 import asyncio
-import re
+import random
 from pathlib import Path
 from datetime import datetime
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urljoin
 
 import aiohttp
 from aiohttp import web
@@ -26,7 +23,31 @@ PORT = int(os.getenv("PORT", "8080"))
 API_BASE = "https://gdgoenkaratia.com/api"
 USER_ID = os.getenv("USER_ID", "")
 
-# ─── HTML Template ───────────────────────────────────────────────────────────
+# Spoofed browser fingerprints
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+]
+
+# Spoofed IP ranges (common Indian ISP IPs - these are fake examples)
+# CloudFront checks X-Forwarded-For and client IP
+SPOOF_IPS = [
+    "103.15.60.{}",
+    "117.200.80.{}",
+    "157.50.100.{}",
+    "42.106.120.{}",
+]
+
+def get_random_ip():
+    template = random.choice(SPOOF_IPS)
+    return template.format(random.randint(2, 254))
+
+def get_random_ua():
+    return random.choice(USER_AGENTS)
+
+# ─── HTML ────────────────────────────────────────────────────────────────────
 
 def get_html():
     html_path = Path(__file__).parent / "index.html"
@@ -34,14 +55,44 @@ def get_html():
         return html_path.read_text(encoding="utf-8")
     return "<h1>index.html not found</h1>"
 
-# ─── API Proxy Handler ───────────────────────────────────────────────────────
+# ─── Browser-like Headers ────────────────────────────────────────────────────
+
+def get_browser_headers(video_url=""):
+    """Generate headers that look exactly like a real browser."""
+    
+    # Parse domain for Referer
+    domain = "https://www.selectionway.com/"
+    if "cloudfront" in video_url:
+        domain = "https://www.selectionway.com/"
+    elif "gdgoenkaratia" in video_url:
+        domain = "https://gdgoenkaratia.com/"
+    
+    return {
+        "User-Agent": get_random_ua(),
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9,hi;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Referer": domain,
+        "Origin": domain.rstrip("/"),
+        "Connection": "keep-alive",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "cross-site",
+        "Sec-Ch-Ua": '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
+        "Sec-Ch-Ua-Mobile": "?0",
+        "Sec-Ch-Ua-Platform": '"Windows"',
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+        "DNT": "1",
+    }
+
+# ─── API Proxy ───────────────────────────────────────────────────────────────
 
 async def proxy_handler(request):
-    """Proxy API requests to SelectionWay, bypassing CORS."""
-    
+    """Proxy API requests with browser spoofing."""
     endpoint = request.query.get("endpoint", "")
     if not endpoint:
-        return web.json_response({"error": "Missing endpoint parameter"}, status=400)
+        return web.json_response({"error": "Missing endpoint"}, status=400)
     
     params = dict(request.query)
     params.pop("endpoint", None)
@@ -49,192 +100,237 @@ async def proxy_handler(request):
     
     target_url = f"{API_BASE}/{endpoint.lstrip('/')}"
     
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "application/json",
-        "Referer": "https://www.selectionway.com/",
-        "Origin": "https://www.selectionway.com",
-    }
+    # Use spoofed browser headers
+    headers = get_browser_headers()
     
-    max_retries = 3
-    for attempt in range(max_retries):
+    for attempt in range(3):
         try:
             timeout = aiohttp.ClientTimeout(total=30)
-            async with aiohttp.ClientSession(headers=headers, timeout=timeout) as session:
-                async with session.get(target_url, params=params, ssl=False) as resp:
+            connector = aiohttp.TCPConnector(
+                ssl=False,
+                force_close=True,  # Fresh connection each time
+                enable_cleanup_closed=True,
+            )
+            async with aiohttp.ClientSession(
+                headers=headers, 
+                timeout=timeout,
+                connector=connector,
+                cookie_jar=aiohttp.CookieJar(unsafe=True),
+            ) as session:
+                async with session.get(target_url, params=params, allow_redirects=True) as resp:
                     if resp.status == 429:
-                        await asyncio.sleep(2)
+                        await asyncio.sleep(random.uniform(2, 5))
                         continue
                     data = await resp.json()
                     return web.json_response(data, status=resp.status)
-        except asyncio.TimeoutError:
-            if attempt < max_retries - 1:
-                await asyncio.sleep(1)
-            else:
-                return web.json_response({"error": "Request timeout"}, status=504)
         except Exception as e:
-            if attempt < max_retries - 1:
-                await asyncio.sleep(1)
-            else:
+            if attempt == 2:
                 return web.json_response({"error": str(e)}, status=500)
+            await asyncio.sleep(random.uniform(1, 3))
     
-    return web.json_response({"error": "Max retries exceeded"}, status=500)
+    return web.json_response({"error": "Max retries"}, status=500)
 
-# ─── Video Proxy Handler (for HLS segments) ──────────────────────────────────
+# ─── Video Proxy ─────────────────────────────────────────────────────────────
 
 async def video_proxy_handler(request):
     """
-    Proxy video segments and m3u8 playlists.
-    This handles CORS for HLS video playback.
+    Proxy video with complete browser spoofing.
+    Mimics a real Chrome browser playing video.
     """
     video_url = request.query.get("url", "")
     if not video_url:
-        return web.Response(text="Missing url parameter", status=400)
+        return web.Response(text="Missing url", status=400)
     
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "*/*",
-        "Referer": "https://www.selectionway.com/",
-        "Origin": "https://www.selectionway.com",
-    }
+    # Get spoofed browser headers
+    headers = get_browser_headers(video_url)
     
-    # Copy relevant headers from original request
+    # Forward Range header for partial content
     if "Range" in request.headers:
         headers["Range"] = request.headers["Range"]
     
+    # Add typical browser video headers
+    headers.update({
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Sec-Fetch-Dest": "video",
+        "Sec-Fetch-Mode": "no-cors",
+        "Sec-Fetch-Site": "cross-site",
+    })
+    
     try:
-        timeout = aiohttp.ClientTimeout(total=60)
-        async with aiohttp.ClientSession(headers=headers, timeout=timeout) as session:
-            async with session.get(video_url, ssl=False) as resp:
+        timeout = aiohttp.ClientTimeout(total=120, connect=10)
+        connector = aiohttp.TCPConnector(
+            ssl=False,
+            force_close=True,
+            enable_cleanup_closed=True,
+            ttl_dns_cache=300,
+        )
+        
+        async with aiohttp.ClientSession(
+            headers=headers,
+            timeout=timeout,
+            connector=connector,
+            cookie_jar=aiohttp.CookieJar(unsafe=True),
+        ) as session:
+            async with session.get(video_url, allow_redirects=True) as resp:
                 content_type = resp.headers.get("Content-Type", "application/octet-stream")
+                
                 response_headers = {
                     "Content-Type": content_type,
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Methods": "GET, OPTIONS",
-                    "Access-Control-Allow-Headers": "Content-Type, Range",
+                    "Access-Control-Allow-Headers": "Content-Type, Range, Origin",
+                    "Access-Control-Expose-Headers": "Content-Length, Content-Range",
                     "Cache-Control": "public, max-age=3600",
+                    "Accept-Ranges": "bytes",
                 }
                 
-                # Pass through content-range for partial content
-                if "Content-Range" in resp.headers:
-                    response_headers["Content-Range"] = resp.headers["Content-Range"]
-                if "Content-Length" in resp.headers:
-                    response_headers["Content-Length"] = resp.headers["Content-Length"]
+                # Pass through important headers
+                for h in ["Content-Range", "Content-Length", "Accept-Ranges", "ETag", "Last-Modified"]:
+                    if h in resp.headers:
+                        response_headers[h] = resp.headers[h]
                 
-                # Read the body
                 body = await resp.read()
                 
-                # If it's an m3u8 playlist, rewrite the URLs to use our proxy
-                if ".m3u8" in video_url.lower() or content_type and "mpegurl" in content_type.lower():
-                    body_text = body.decode("utf-8", errors="ignore")
-                    # Rewrite relative URLs to go through our proxy
-                    base_url = video_url.rsplit("/", 1)[0] + "/"
-                    proxy_base = f"/api/video?url="
-                    
-                    lines = body_text.split("\n")
-                    new_lines = []
-                    for line in lines:
-                        line = line.strip()
-                        if line and not line.startswith("#"):
-                            # It's a segment URL
-                            if line.startswith("http"):
-                                segment_url = line
+                # Rewrite m3u8 playlists
+                is_m3u8 = (
+                    ".m3u8" in video_url.lower() or 
+                    (content_type and "mpegurl" in content_type.lower()) or
+                    (content_type and "vnd.apple.mpegurl" in content_type.lower())
+                )
+                
+                is_mpd = ".mpd" in video_url.lower()
+                
+                if is_m3u8 or is_mpd:
+                    try:
+                        body_text = body.decode("utf-8", errors="ignore")
+                        base_url = video_url.rsplit("/", 1)[0] + "/"
+                        
+                        # Also resolve relative to parent
+                        if "?" in base_url:
+                            base_url = base_url.split("?")[0].rsplit("/", 1)[0] + "/"
+                        
+                        lines = body_text.split("\n")
+                        new_lines = []
+                        
+                        for line in lines:
+                            stripped = line.strip()
+                            
+                            # Keep comments and empty lines
+                            if not stripped or stripped.startswith("#"):
+                                new_lines.append(line)
+                                continue
+                            
+                            # Skip if already proxied
+                            if stripped.startswith("/api/video"):
+                                new_lines.append(line)
+                                continue
+                            
+                            # Resolve URL
+                            if stripped.startswith("http"):
+                                segment_url = stripped
                             else:
-                                segment_url = urljoin(base_url, line)
-                            new_lines.append(f"{proxy_base}{segment_url}")
-                        else:
-                            new_lines.append(line)
-                    
-                    body = "\n".join(new_lines).encode("utf-8")
+                                # Try different resolution methods
+                                segment_url = urljoin(base_url, stripped)
+                                if not segment_url.startswith("http"):
+                                    # Try parent directory
+                                    parent_base = base_url.rsplit("/", 2)[0] + "/"
+                                    segment_url = urljoin(parent_base, stripped)
+                            
+                            # Proxy through our server
+                            proxy_url = f"/api/video?url={segment_url}"
+                            new_lines.append(proxy_url)
+                        
+                        body = "\n".join(new_lines).encode("utf-8")
+                        response_headers["Content-Length"] = str(len(body))
+                        
+                    except Exception as e:
+                        print(f"m3u8 rewrite error: {e}")
+                        # If rewrite fails, still serve original
+                        pass
                 
-                resp_status = resp.status if resp.status == 206 else 200
-                return web.Response(body=body, status=resp_status, headers=response_headers)
+                return web.Response(
+                    body=body,
+                    status=resp.status,
+                    headers=response_headers
+                )
                 
+    except asyncio.TimeoutError:
+        return web.Response(text="Video request timeout", status=504)
+    except aiohttp.ClientError as e:
+        print(f"Video fetch error: {e}")
+        return web.Response(text=f"Fetch error: {str(e)}", status=502)
     except Exception as e:
         print(f"Video proxy error: {e}")
         return web.Response(text=f"Proxy error: {str(e)}", status=500)
 
-# ─── CORS Preflight Handler ──────────────────────────────────────────────────
+# ─── Direct Stream Handler (for iframe fallback) ─────────────────────────────
 
-async def cors_preflight(request):
-    """Handle CORS preflight requests."""
-    return web.Response(
-        status=204,
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Range, Authorization",
-            "Access-Control-Max-Age": "86400",
-        }
-    )
-
-# ─── Main HTML Handler ───────────────────────────────────────────────────────
-
-async def index_handler(request):
-    """Serve the main HTML page."""
-    html = get_html()
-    return web.Response(text=html, content_type="text/html")
-
-# ─── Health Check ────────────────────────────────────────────────────────────
-
-async def health_handler(request):
-    """Health check endpoint for Koyeb."""
-    return web.json_response({
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "app": "Engineers Babu",
-        "api": API_BASE
+async def stream_handler(request):
+    """Handle OPTIONS preflight."""
+    return web.Response(status=204, headers={
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Range",
     })
 
 # ─── CORS Middleware ─────────────────────────────────────────────────────────
 
 @web.middleware
 async def cors_middleware(request, handler):
-    """Add CORS headers to all responses."""
     if request.method == "OPTIONS":
-        return await cors_preflight(request)
+        return web.Response(status=204, headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Range, Origin, Accept",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "86400",
+        })
     
-    response = await handler(request)
+    try:
+        response = await handler(request)
+    except Exception as e:
+        response = web.Response(text=str(e), status=500)
+    
     response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Range"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
 
-# ─── Application Setup ───────────────────────────────────────────────────────
+# ─── Routes ──────────────────────────────────────────────────────────────────
+
+async def index_handler(request):
+    return web.Response(text=get_html(), content_type="text/html")
+
+async def health_handler(request):
+    return web.json_response({
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "spoofed_ua": get_random_ua()[:50] + "...",
+    })
+
+# ─── App ─────────────────────────────────────────────────────────────────────
 
 def create_app():
-    """Create and configure the aiohttp application."""
     app = web.Application(middlewares=[cors_middleware])
-    
-    # Routes
     app.router.add_get("/", index_handler)
     app.router.add_get("/health", health_handler)
     app.router.add_get("/api/proxy", proxy_handler)
     app.router.add_get("/api/video", video_proxy_handler)
-    app.router.add_options("/api/video", cors_preflight)
-    app.router.add_options("/api/proxy", cors_preflight)
-    
+    app.router.add_options("/api/video", stream_handler)
+    app.router.add_options("/api/proxy", stream_handler)
     return app
 
-# ─── Main ────────────────────────────────────────────────────────────────────
-
 def main():
-    """Start the web server."""
     print(f"""
 ╔══════════════════════════════════════╗
-║  Engineers Babu - Koyeb Edition      ║
-║  API + Video Proxy Server            ║
+║  Engineers Babu - Browser Spoofing   ║
+║  Mimics Real Chrome Browser          ║
 ╚══════════════════════════════════════╝
     """)
-    
     app = create_app()
-    
-    print(f"🚀 Starting server on port {PORT}")
-    print(f"📡 API Proxy: /api/proxy")
-    print(f"🎬 Video Proxy: /api/video")
-    print(f"🌐 Health: http://0.0.0.0:{PORT}/health")
-    print(f"📱 App: http://0.0.0.0:{PORT}/")
-    
+    print(f"🚀 Port: {PORT}")
+    print(f"🕵️ UA Spoofing: {len(USER_AGENTS)} user agents")
+    print(f"🌐 Referer: selectionway.com")
     web.run_app(app, host="0.0.0.0", port=PORT)
 
 if __name__ == "__main__":
