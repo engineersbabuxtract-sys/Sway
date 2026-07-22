@@ -23,30 +23,33 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);transition:background .25s,color .25s;min-height:100vh;}
 h1,h2,h3{font-family:'Space Grotesk',sans-serif;}
-button,input{font-family:inherit;}
+button,input,select{font-family:inherit;}
 
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
 #loginScreen::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(rgba(41,85,201,0.08) 0 1px,transparent 1px 40px);opacity:.6;pointer-events:none;}
-.login-card{position:relative;width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:34px 30px 28px;}
-.login-card .brand{font-size:26px;font-weight:700;}
+.login-card{position:relative;width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:34px 30px 28px;max-height:90vh;overflow-y:auto;}
+.login-card .brand{font-size:26px;font-weight:700;text-align:center;}
 .login-card .brand span{color:var(--accent);}
-.login-sub{color:var(--ink-soft);font-size:13px;margin-top:4px;margin-bottom:22px;}
+.login-sub{color:var(--ink-soft);font-size:13px;margin-top:4px;margin-bottom:20px;text-align:center;}
+.tabs{display:flex;background:var(--rule-bg);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:18px;}
+.tabs button{flex:1;border:none;background:transparent;color:var(--ink-soft);padding:9px 0;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;}
+.tabs button.active{background:var(--accent);color:#fff;}
 .field{margin-bottom:14px;}
 .field label{font-size:12px;color:var(--ink-soft);display:block;margin-bottom:6px;font-weight:500;}
 .field .row{display:flex;align-items:center;border:1px solid var(--border);border-radius:10px;background:var(--rule-bg);overflow:hidden;}
+.field .row .prefix{padding:11px 10px;color:var(--ink-soft);font-size:14px;border-right:1px solid var(--border);}
 .field input{flex:1;border:none;background:transparent;outline:none;padding:11px 12px;color:var(--ink);font-size:14px;}
-.btn-primary{width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;cursor:pointer;margin-top:6px;}
+.btn-primary{width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;cursor:pointer;margin-top:6px;transition:all .15s;}
 .btn-primary:hover{filter:brightness(1.08);}
 .btn-primary:disabled{opacity:0.6;cursor:not-allowed;}
-.skip-link{display:block;text-align:center;margin-top:16px;font-size:13px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
-.login-note{margin-top:18px;font-size:12px;color:var(--ink-soft);border-top:1px dashed var(--border);padding-top:12px;}
+.link-text{text-align:center;margin-top:12px;font-size:13px;color:var(--accent);cursor:pointer;text-decoration:underline;}
 .error-msg{color:var(--accent-2);font-size:12px;margin-top:-6px;margin-bottom:10px;display:none;}
 .success-msg{color:#059669;font-size:12px;margin-top:-6px;margin-bottom:10px;display:none;}
+
 .otp-inputs{display:flex;gap:8px;justify-content:center;margin-bottom:14px;}
 .otp-inputs input{width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border:1px solid var(--border);border-radius:10px;background:var(--rule-bg);color:var(--ink);outline:none;}
 .otp-inputs input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
 .timer{text-align:center;font-size:12px;color:var(--ink-soft);margin-bottom:14px;}
-.resend-link{text-align:center;font-size:13px;color:var(--accent);cursor:pointer;text-decoration:underline;display:block;margin-top:10px;}
 
 .main-header{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;background:var(--card);border-bottom:1px solid var(--border);}
 .brand-mark{font-size:24px;font-weight:700;display:flex;align-items:baseline;gap:8px;}
@@ -90,11 +93,11 @@ button,input{font-family:inherit;}
 .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);}
 .panel h3{font-size:15px;margin-bottom:12px;}
 iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--rule-bg);}
-.list-item{margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--rule-bg);cursor:pointer;font-size:13.5px;border:1px solid transparent;word-break:break-all;}
+.list-item{margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--rule-bg);cursor:pointer;font-size:13.5px;border:1px solid transparent;}
 .list-item:hover{border-color:var(--accent);}
 .list-item.playing{background:var(--accent);color:#fff;}
 .empty-hint{color:var(--ink-soft);font-size:13px;font-style:italic;}
-.video-btn{display:inline-block;padding:14px 28px;background:var(--accent);color:#fff;border-radius:12px;text-decoration:none;font-weight:600;font-size:15px;margin:6px 0;transition:filter .15s;}
+.video-btn{display:inline-block;padding:14px 28px;background:var(--accent);color:#fff;border-radius:12px;text-decoration:none;font-weight:600;font-size:15px;margin:6px 0;}
 .video-btn:hover{filter:brightness(1.1);}
 .video-card{text-align:center;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-top:12px;}
 [hidden]{display:none!important;}
@@ -103,51 +106,121 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- ═══════════ LOGIN SCREEN ═══════════ -->
 <div id="loginScreen">
-  <div class="login-card" id="loginCard">
-    <!-- STEP 1: Email -->
-    <div id="stepEmail">
-      <div class="brand">Engineers<span> Babu</span></div>
-      <div class="login-sub">Enter your email to receive a verification code.</div>
+  <div class="login-card">
+    <div class="brand">Engineers<span> Babu</span></div>
+    <div class="login-sub" id="loginSubtitle">Login to your account</div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button id="tabLogin" class="active" onclick="showTab('login')">Login</button>
+      <button id="tabRegister" onclick="showTab('register')">Register</button>
+    </div>
+
+    <!-- ═══ LOGIN FORM ═══ -->
+    <div id="formLogin">
       <div class="field">
-        <label>Email address</label>
-        <div class="row"><input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email"></div>
+        <label>User ID</label>
+        <div class="row"><input type="text" id="loginUserid" placeholder="EB1234" autocomplete="username"></div>
       </div>
-      <div class="error-msg" id="emailError"></div>
-      <button class="btn-primary" id="sendOtpBtn" onclick="sendOTP()">Send Verification Code</button>
-      <span class="skip-link" onclick="enterApp(false)">Skip → continue as guest</span>
+      <div class="field">
+        <label>Password</label>
+        <div class="row"><input type="password" id="loginPassword" placeholder="••••••••"></div>
+      </div>
+      <div class="error-msg" id="loginError"></div>
+      <button class="btn-primary" onclick="doLogin()">Sign In</button>
+      <div class="link-text" onclick="showForgotPassword()">Forgot Password?</div>
     </div>
 
-    <!-- STEP 2: OTP -->
-    <div id="stepOTP" hidden>
-      <div class="brand">Check<span> Email</span></div>
-      <div class="login-sub">We sent a 6-digit code to <strong id="otpEmail"></strong></div>
+    <!-- ═══ REGISTER FORM ═══ -->
+    <div id="formRegister" hidden>
+      <div class="field">
+        <label>Full Name</label>
+        <div class="row"><input type="text" id="regName" placeholder="Your full name"></div>
+      </div>
+      <div class="field">
+        <label>Email ID</label>
+        <div class="row"><input type="email" id="regEmail" placeholder="you@example.com"></div>
+      </div>
+      <div class="field">
+        <label>Mobile Number</label>
+        <div class="row"><span class="prefix">+91</span><input type="tel" id="regMobile" placeholder="9876543210" maxlength="10"></div>
+      </div>
+      <div class="field">
+        <label>Create Password</label>
+        <div class="row"><input type="password" id="regPassword" placeholder="Min 6 characters"></div>
+      </div>
+      <div class="error-msg" id="regError"></div>
+      <button class="btn-primary" id="regBtn" onclick="startRegistration()">Send Verification Code</button>
+    </div>
+
+    <!-- ═══ OTP VERIFICATION ═══ -->
+    <div id="formOTP" hidden>
+      <div class="login-sub">Enter code sent to <strong id="otpEmail"></strong></div>
       <div class="otp-inputs">
-        <input type="text" maxlength="1" id="otp1" inputmode="numeric" oninput="otpNext(this)" onkeydown="otpBack(event,this,null)">
-        <input type="text" maxlength="1" id="otp2" inputmode="numeric" oninput="otpNext(this)" onkeydown="otpBack(event,this,'otp1')">
-        <input type="text" maxlength="1" id="otp3" inputmode="numeric" oninput="otpNext(this)" onkeydown="otpBack(event,this,'otp2')">
-        <input type="text" maxlength="1" id="otp4" inputmode="numeric" oninput="otpNext(this)" onkeydown="otpBack(event,this,'otp3')">
-        <input type="text" maxlength="1" id="otp5" inputmode="numeric" oninput="otpNext(this)" onkeydown="otpBack(event,this,'otp4')">
-        <input type="text" maxlength="1" id="otp6" inputmode="numeric" onkeydown="otpBack(event,this,'otp5')">
+        <input type="text" maxlength="1" id="o1" inputmode="numeric" oninput="otpNext(this)" onkeydown="otpBack(event,this,null)">
+        <input type="text" maxlength="1" id="o2" inputmode="numeric" oninput="otpNext(this)" onkeydown="otpBack(event,this,'o1')">
+        <input type="text" maxlength="1" id="o3" inputmode="numeric" oninput="otpNext(this)" onkeydown="otpBack(event,this,'o2')">
+        <input type="text" maxlength="1" id="o4" inputmode="numeric" oninput="otpNext(this)" onkeydown="otpBack(event,this,'o3')">
+        <input type="text" maxlength="1" id="o5" inputmode="numeric" oninput="otpNext(this)" onkeydown="otpBack(event,this,'o4')">
+        <input type="text" maxlength="1" id="o6" inputmode="numeric" onkeydown="otpBack(event,this,'o5')">
       </div>
-      <div class="error-msg" id="otpError"></div>
-      <div class="success-msg" id="otpSuccess"></div>
       <div class="timer" id="timer"></div>
-      <button class="btn-primary" id="verifyBtn" onclick="verifyOTP()">Verify & Sign In</button>
-      <span class="resend-link" onclick="sendOTP()">Resend Code</span>
-      <span class="skip-link" onclick="goBackToEmail()">← Use different email</span>
+      <div class="error-msg" id="otpError"></div>
+      <button class="btn-primary" id="verifyBtn" onclick="verifyRegistrationOTP()">Verify & Create Account</button>
+      <div class="link-text" onclick="goBackToRegister()">← Back</div>
     </div>
 
-    <div class="login-note">No password needed. We'll send a one-time code to your email.</div>
+    <!-- ═══ FORGOT PASSWORD ═══ -->
+    <div id="formForgot" hidden>
+      <div class="login-sub">Enter your registered email</div>
+      <div class="field">
+        <label>Email ID</label>
+        <div class="row"><input type="email" id="forgotEmail" placeholder="you@example.com"></div>
+      </div>
+      <div class="error-msg" id="forgotError"></div>
+      <div class="success-msg" id="forgotSuccess"></div>
+      <button class="btn-primary" onclick="sendResetCode()">Send Reset Code</button>
+      <div class="link-text" onclick="showTab('login')">← Back to Login</div>
+    </div>
+
+    <!-- ═══ RESET PASSWORD ═══ -->
+    <div id="formReset" hidden>
+      <div class="login-sub">Enter code and new password</div>
+      <div id="resetUserid" style="text-align:center;font-weight:600;margin-bottom:10px;"></div>
+      <div class="field">
+        <label>Reset Code</label>
+        <div class="row"><input type="text" id="resetCode" placeholder="6-digit code"></div>
+      </div>
+      <div class="field">
+        <label>New Password</label>
+        <div class="row"><input type="password" id="resetPassword" placeholder="Min 6 characters"></div>
+      </div>
+      <div class="error-msg" id="resetError"></div>
+      <button class="btn-primary" onclick="resetPassword()">Reset Password</button>
+      <div class="link-text" onclick="showTab('login')">← Back to Login</div>
+    </div>
+
+    <!-- ═══ SUCCESS (after registration) ═══ -->
+    <div id="formSuccess" hidden>
+      <div style="text-align:center;padding:20px;">
+        <div style="font-size:50px;margin-bottom:15px;">✅</div>
+        <h3 style="color:#059669;">Registration Successful!</h3>
+        <p style="margin:10px 0;font-size:14px;">Your User ID:</p>
+        <div style="font-size:24px;font-weight:700;color:var(--accent);padding:10px;background:var(--rule-bg);border-radius:10px;margin:10px 0;" id="newUserid"></div>
+        <p style="font-size:12px;color:var(--ink-soft);">Use this User ID and your password to login</p>
+        <button class="btn-primary" onclick="showTab('login')" style="margin-top:15px;">Go to Login</button>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- MAIN APP -->
+<!-- ═══════════ MAIN APP ═══════════ -->
 <div id="mainScreen" hidden>
   <header class="main-header">
     <div class="brand-mark">Engineers<span> Babu</span><span class="tag">· LEARNING</span></div>
-    <div class="header-actions"><span class="pill-btn" id="userPill">Guest</span><span class="pill-btn" onclick="toggleTheme()">🌙 / ☀️</span></div>
+    <div class="header-actions"><span class="pill-btn" id="userPill">User</span><span class="pill-btn" onclick="toggleTheme()">🌙 / ☀️</span></div>
   </header>
   <div class="gradient-bar"></div>
   <div class="search-wrap"><input type="text" id="searchBox" placeholder="Search batches..." onkeyup="handleSearch(this.value)"></div>
@@ -184,105 +257,192 @@ iframe{width:100%;height:420px;border:none;border-radius:10px;background:var(--r
 </div>
 
 <script>
-const USER_ID="";
 const API_PROXY="/api/proxy";
-
-let state={loggedIn:false,batchId:null,topicId:null,batchName:null,topicName:null};
+let state={loggedIn:false,userid:null,username:null,batchId:null,topicId:null,batchName:null,topicName:null};
 let allBatches=[];
-let otpCode="",otpTimer=null,otpSeconds=300,currentEmail="";
+let otpTimer=null,otpSeconds=300,regEmail="",regData={};
 
 async function apiGet(endpoint,params={}){
-  params.userId=USER_ID;
   const url=`${API_PROXY}?endpoint=${encodeURIComponent(endpoint)}&`+Object.entries(params).filter(([,v])=>v!==undefined&&v!==null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
   try{const r=await fetch(url);return r.ok?await r.json():null;}catch(e){return null;}
 }
 
-// ═══════════ EMAIL OTP VERIFICATION ═══════════
+async function apiPost(endpoint,body){
+  try{const r=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});return await r.json();}catch(e){return{success:false,error:"Network error"};}
+}
 
-function sendOTP(){
-  const email=document.getElementById("emailInput").value.trim();
-  const errEl=document.getElementById("emailError");
-  const btn=document.getElementById("sendOtpBtn");
+// ═══════════ TABS ═══════════
+function showTab(tab){
+  document.getElementById("tabLogin").classList.toggle("active",tab==="login");
+  document.getElementById("tabRegister").classList.toggle("active",tab==="register");
+  document.getElementById("formLogin").hidden=tab!=="login";
+  document.getElementById("formRegister").hidden=tab!=="register";
+  document.getElementById("formOTP").hidden=true;
+  document.getElementById("formForgot").hidden=true;
+  document.getElementById("formReset").hidden=true;
+  document.getElementById("formSuccess").hidden=true;
+  document.getElementById("loginSubtitle").textContent=tab==="login"?"Login to your account":"Create a new account";
+  clearErrors();
+}
+
+function showForgotPassword(){
+  document.getElementById("formLogin").hidden=true;
+  document.getElementById("formForgot").hidden=false;
+  document.getElementById("formReset").hidden=true;
+  document.getElementById("loginSubtitle").textContent="Reset your password";
+  clearErrors();
+}
+
+function goBackToRegister(){
+  document.getElementById("formOTP").hidden=true;
+  document.getElementById("formRegister").hidden=false;
+  clearInterval(otpTimer);
+}
+
+function clearErrors(){
+  ["loginError","regError","otpError","forgotError","resetError"].forEach(id=>{
+    document.getElementById(id).style.display="none";
+  });
+}
+
+// ═══════════ LOGIN ═══════════
+async function doLogin(){
+  const userid=document.getElementById("loginUserid").value.trim();
+  const password=document.getElementById("loginPassword").value;
+  const errEl=document.getElementById("loginError");
   errEl.style.display="none";
 
-  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-    errEl.textContent="Please enter a valid email address.";
-    errEl.style.display="block";return;
+  if(!userid||!password){errEl.textContent="Enter User ID and password";errEl.style.display="block";return;}
+
+  const data=await apiPost("/api/login",{userid,password});
+  if(data.success){
+    state.userid=userid;state.username=data.name;state.loggedIn=true;
+    document.getElementById("loginScreen").hidden=true;
+    document.getElementById("mainScreen").hidden=false;
+    document.getElementById("userPill").textContent=data.name||userid;
+    loadMeta();renderApps();renderBreadcrumb();
+  }else{
+    errEl.textContent=data.error;errEl.style.display="block";
   }
-
-  btn.disabled=true;btn.textContent="Sending...";
-  otpCode=String(Math.floor(100000+Math.random()*900000));
-  currentEmail=email;otpSeconds=300;
-
-  fetch(`/api/send-otp?email=${encodeURIComponent(email)}&code=${otpCode}`)
-    .then(r=>r.json())
-    .then(data=>{
-      btn.disabled=false;btn.textContent="Send Verification Code";
-      if(data.demo) alert("Demo Mode\nYour OTP: "+otpCode+"\n\n(Configure SMTP_EMAIL and SMTP_PASSWORD in Koyeb to send real emails)");
-      showOTPStep();
-    })
-    .catch(()=>{
-      btn.disabled=false;btn.textContent="Send Verification Code";
-      alert("Demo Mode\nYour OTP: "+otpCode);
-      showOTPStep();
-    });
 }
 
-function showOTPStep(){
-  document.getElementById("stepEmail").hidden=true;
-  document.getElementById("stepOTP").hidden=false;
-  document.getElementById("otpEmail").textContent=currentEmail;
-  document.getElementById("otpError").style.display="none";
-  document.getElementById("otpSuccess").style.display="none";
-  for(let i=1;i<=6;i++) document.getElementById("otp"+i).value="";
-  document.getElementById("otp1").focus();
-  startTimer();
-}
-
-function startTimer(){
-  clearInterval(otpTimer);otpSeconds=300;updateTimer();
-  otpTimer=setInterval(()=>{otpSeconds--;updateTimer();if(otpSeconds<=0){clearInterval(otpTimer);document.getElementById("timer").textContent="⏰ Code expired. Request a new one.";}},1000);
-}
-
-function updateTimer(){
-  const m=Math.floor(otpSeconds/60),s=otpSeconds%60;
-  document.getElementById("timer").textContent=`Code expires in ${m}:${s.toString().padStart(2,'0')}`;
-}
-
-function otpNext(input){if(input.value.length===1){const n=input.nextElementSibling;if(n)n.focus();}}
-function otpBack(e,input,prevId){if(e.key==="Backspace"&&!input.value&&prevId)document.getElementById(prevId).focus();}
-
-function verifyOTP(){
-  const entered=[1,2,3,4,5,6].map(i=>document.getElementById("otp"+i).value).join("");
-  const errEl=document.getElementById("otpError");
+// ═══════════ REGISTRATION ═══════════
+async function startRegistration(){
+  const name=document.getElementById("regName").value.trim();
+  const email=document.getElementById("regEmail").value.trim();
+  const mobile=document.getElementById("regMobile").value.trim();
+  const password=document.getElementById("regPassword").value;
+  const errEl=document.getElementById("regError");
+  const btn=document.getElementById("regBtn");
   errEl.style.display="none";
-  if(entered.length!==6){errEl.textContent="Enter the complete 6-digit code.";errEl.style.display="block";return;}
-  if(otpSeconds<=0){errEl.textContent="Code expired. Request a new one.";errEl.style.display="block";return;}
-  if(entered===otpCode){clearInterval(otpTimer);enterApp(true,currentEmail);}
-  else{errEl.textContent="Invalid code. Try again.";errEl.style.display="block";}
+
+  if(!name){errEl.textContent="Enter your name";errEl.style.display="block";return;}
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent="Enter valid email";errEl.style.display="block";return;}
+  if(password.length<6){errEl.textContent="Password must be at least 6 characters";errEl.style.display="block";return;}
+
+  regData={name,email,mobile,password};
+  regEmail=email;
+  btn.disabled=true;btn.textContent="Sending...";
+
+  const data=await apiPost("/api/register-otp",regData);
+  btn.disabled=false;btn.textContent="Send Verification Code";
+
+  if(data.success){
+    document.getElementById("formRegister").hidden=true;
+    document.getElementById("formOTP").hidden=false;
+    document.getElementById("otpEmail").textContent=email;
+    for(let i=1;i<=6;i++) document.getElementById("o"+i).value="";
+    document.getElementById("o1").focus();
+    otpSeconds=300;startOTPTimer();
+  }else{
+    errEl.textContent=data.error;errEl.style.display="block";
+  }
 }
 
-function goBackToEmail(){clearInterval(otpTimer);document.getElementById("stepOTP").hidden=true;document.getElementById("stepEmail").hidden=false;}
+async function verifyRegistrationOTP(){
+  const code=[1,2,3,4,5,6].map(i=>document.getElementById("o"+i).value).join("");
+  const errEl=document.getElementById("otpError");
+  const btn=document.getElementById("verifyBtn");
+  errEl.style.display="none";
+  if(code.length!==6){errEl.textContent="Enter complete code";errEl.style.display="block";return;}
+  if(otpSeconds<=0){errEl.textContent="Code expired";errEl.style.display="block";return;}
+
+  btn.disabled=true;btn.textContent="Verifying...";
+  const data=await apiPost("/api/register-verify",{email:regEmail,code});
+  btn.disabled=false;btn.textContent="Verify & Create Account";
+
+  if(data.success){
+    clearInterval(otpTimer);
+    document.getElementById("formOTP").hidden=true;
+    document.getElementById("formSuccess").hidden=false;
+    document.getElementById("newUserid").textContent=data.userid;
+    document.getElementById("loginSubtitle").textContent="Registration Complete";
+  }else{
+    errEl.textContent=data.error;errEl.style.display="block";
+  }
+}
+
+// ═══════════ FORGOT PASSWORD ═══════════
+async function sendResetCode(){
+  const email=document.getElementById("forgotEmail").value.trim();
+  const errEl=document.getElementById("forgotError");
+  const sucEl=document.getElementById("forgotSuccess");
+  errEl.style.display="none";sucEl.style.display="none";
+
+  if(!email){errEl.textContent="Enter your email";errEl.style.display="block";return;}
+  const data=await apiPost("/api/forgot-password",{email});
+  if(data.success){
+    sucEl.textContent="Code sent! Your User ID: "+data.userid;
+    sucEl.style.display="block";
+    document.getElementById("formForgot").hidden=true;
+    document.getElementById("formReset").hidden=false;
+    document.getElementById("resetUserid").textContent="User ID: "+data.userid;
+  }else{
+    errEl.textContent=data.error;errEl.style.display="block";
+  }
+}
+
+async function resetPassword(){
+  const email=document.getElementById("forgotEmail").value.trim();
+  const code=document.getElementById("resetCode").value.trim();
+  const password=document.getElementById("resetPassword").value;
+  const errEl=document.getElementById("resetError");
+  errEl.style.display="none";
+
+  if(!code){errEl.textContent="Enter reset code";errEl.style.display="block";return;}
+  if(password.length<6){errEl.textContent="Password must be at least 6 characters";errEl.style.display="block";return;}
+
+  const data=await apiPost("/api/reset-password",{email,code,password});
+  if(data.success){
+    alert("Password changed successfully!");
+    showTab("login");
+  }else{
+    errEl.textContent=data.error;errEl.style.display="block";
+  }
+}
+
+// ═══════════ OTP TIMER ═══════════
+function startOTPTimer(){
+  clearInterval(otpTimer);updateOTPTimer();
+  otpTimer=setInterval(()=>{otpSeconds--;updateOTPTimer();if(otpSeconds<=0){clearInterval(otpTimer);document.getElementById("timer").textContent="Code expired. Request new.";}},1000);
+}
+function updateOTPTimer(){
+  const m=Math.floor(otpSeconds/60),s=otpSeconds%60;
+  document.getElementById("timer").textContent=`Expires in ${m}:${s.toString().padStart(2,'0')}`;
+}
+function otpNext(i){if(i.value.length===1){const n=i.nextElementSibling;if(n)n.focus();}}
+function otpBack(e,i,prev){if(e.key==="Backspace"&&!i.value&&prev)document.getElementById(prev).focus();}
 
 // ═══════════ APP ═══════════
-
-function enterApp(loggedIn,id){
-  state.loggedIn=loggedIn;
-  document.getElementById("loginScreen").hidden=true;
-  document.getElementById("mainScreen").hidden=false;
-  document.getElementById("userPill").textContent=loggedIn?id:"Guest";
-  loadMeta();renderApps();renderBreadcrumb();
-}
-async function loadMeta(){const d=await apiGet("courses/active");document.getElementById("swMeta").textContent=(d&&d.data)?d.data.length+" batches":"Tap to load";}
 function toggleTheme(){document.body.classList.toggle("dark");}
+async function loadMeta(){const d=await apiGet("courses/active");document.getElementById("swMeta").textContent=(d&&d.data)?d.data.length+" batches":"Tap to load";}
 function showView(n){["viewApps","viewBatches","viewTopics","viewPlayer"].forEach(v=>document.getElementById(v).hidden=v!==n);}
 function renderBreadcrumb(){
   let p=[{l:"My Apps",f:goApps}];
   if(state.batchId) p.push({l:state.batchName||"Batch",f:()=>goBatches()});
   if(state.topicId) p.push({l:state.topicName||"Topic",f:null});
-  const bc=document.getElementById("breadcrumb");
-  bc.innerHTML=p.map((x,i)=>(i>0?'<span class="arrow">↓</span>':'')+`<span class="crumb ${i===p.length-1?'current':''}">${x.l}</span>`).join("");
-  bc.querySelectorAll(".crumb").forEach((el,i)=>{if(p[i].f)el.onclick=p[i].f;});
+  document.getElementById("breadcrumb").innerHTML=p.map((x,i)=>(i>0?'<span class="arrow">↓</span>':'')+`<span class="crumb ${i===p.length-1?'current':''}">${x.l}</span>`).join("");
+  document.querySelectorAll("#breadcrumb .crumb").forEach((el,i)=>{if(p[i].f)el.onclick=p[i].f;});
 }
 function renderApps(){showView("viewApps");renderBreadcrumb();}
 function goApps(){state.batchId=null;state.topicId=null;state.batchName=null;state.topicName=null;renderApps();}
